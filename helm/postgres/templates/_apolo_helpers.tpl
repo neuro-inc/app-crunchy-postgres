@@ -15,7 +15,7 @@
   {{- end }}
 {{- end }}
 
-{{- return $value }}
+{{- $value }}
 {{- end }}
 
 
@@ -36,7 +36,7 @@
   {{- printf "# Invalid gcs.key format" }}
 {{- end }}
 
-{{- return $gcsSecretValue }}
+{{- $gcsSecretValue }}
 {{- end }}
 
 
@@ -58,7 +58,7 @@
   {{- printf "# Invalid gcs.key format" }}
 {{- end }}
 
-{{- return $awsKeyValue }}
+{{- $awsKeyValue }}
 {{- end }}
 
 {{- define "mychart.resolveAwsS3KeySecret" -}}
@@ -78,5 +78,5 @@
   {{- printf "# Invalid gcs.key format" }}
 {{- end }}
 
-{{- return $awsKeyValueSecret }}
+{{- $awsKeyValueSecret }}
 {{- end }}
