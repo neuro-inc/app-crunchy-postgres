@@ -1,18 +1,35 @@
 {{- define "mychart.getSecretValue" -}}
+
 {{- $name := .name }}
 {{- $namespace := .namespace }}
 {{- $key := .key }}
 {{- $ctx := .ctx }}
 {{- $value := "" }}
 
+# DEBUG: getSecretValue called
+# DEBUG: Secret name: {{ $name }}
+# DEBUG: Secret namespace: {{ $namespace }}
+# DEBUG: Secret key: {{ $key }}
+# DEBUG: Helm version: {{ $ctx.Capabilities.HelmVersion.Version }}
+
 {{- if semverCompare ">=3.2.0" $ctx.Capabilities.HelmVersion.Version }}
   {{- $secret := lookup "v1" "Secret" $namespace $name }}
   {{- if $secret }}
+    # DEBUG: ✅ Secret '{{ $name }}' found in namespace '{{ $namespace }}'
     {{- $data := index $secret.data $key }}
     {{- if $data }}
+      # DEBUG: ✅ Key '{{ $key }}' found in secret
+      # DEBUG: base64 value: {{ $data }}
+      # DEBUG: decoded value: {{ $data | b64dec }}
       {{- $value = $data }}
+    {{- else }}
+      # DEBUG: ❌ Key '{{ $key }}' NOT found in secret
     {{- end }}
+  {{- else }}
+    # DEBUG: ❌ Secret '{{ $name }}' NOT found in namespace '{{ $namespace }}'
   {{- end }}
+{{- else }}
+  # DEBUG: Helm version < 3.2.0 — lookup not supported
 {{- end }}
 
 {{- $value }}
@@ -33,13 +50,13 @@
       "ctx" $ctx) }}
   {{- $gcsSecretValue = $externalValue }}
 {{- else }}
-  {{- printf "# Invalid gcs.key format" }}
+  # DEBUG: Invalid gcs.key format
 {{- end }}
+
+# DEBUG: resolved value: {{ $gcsSecretValue }}
 
 {{- $gcsSecretValue }}
 {{- end }}
-
-
 
 {{- define "mychart.resolveAwsS3Key" -}}
 {{- $ctx := . }}
