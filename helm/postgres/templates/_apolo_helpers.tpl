@@ -5,12 +5,15 @@
 {{- $key := .key }}
 {{- $ctx := .ctx }}
 {{- $value := "" }}
-
+# DEBUG: ENTERED THE FUNCTION
 {{- if semverCompare ">=3.2.0" $ctx.Capabilities.HelmVersion.Version }}
   {{- $secret := lookup "v1" "Secret" $namespace $name }}
+  # DEBUG: LOOKUP SECRET
   {{- if $secret }}
+  # DEBUG: SECRET OK
     {{- $data := index $secret.data $key }}
     {{- if $data }}
+    # DEBUG: DATA OK
       {{- $value = $data }}
     {{- else }}
       # INFO: ❌ Key '{{ $key }}' NOT found in secret
@@ -31,8 +34,10 @@
 {{- $gcsSecretValue := "" }}
 
 {{- if kindIs "string" $ctx.Values.gcs.key }}
+# DEBUG: STRING TYPE
   {{- $gcsSecretValue = $ctx.Values.gcs.key }}
 {{- else if and $ctx.Values.gcs.key.valueFrom.secretKeyRef.name $ctx.Values.gcs.key.valueFrom.secretKeyRef.key }}
+  # DEBUG: OTHER TYPE
   {{- $externalValue := include "mychart.getSecretValue" (dict
       "name" $ctx.Values.gcs.key.valueFrom.secretKeyRef.name
       "namespace" $ctx.Release.Namespace
