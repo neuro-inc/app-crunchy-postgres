@@ -5,24 +5,25 @@
 {{- $key := .key }}
 {{- $ctx := .ctx }}
 {{- $value := "" }}
-# DEBUG: ENTERED THE FUNCTION
+  {{- printf "# DEBUG: ENTERED THE FUNCTION" }}
 {{- if semverCompare ">=3.2.0" $ctx.Capabilities.HelmVersion.Version }}
   {{- $secret := lookup "v1" "Secret" $namespace $name }}
-  # DEBUG: LOOKUP SECRET
+  {{- printf "# DEBUG: LOOKUP SECRET" }}
   {{- if $secret }}
-  # DEBUG: SECRET OK
+    {{- printf "# DEBUG: SECRET OK" }}
     {{- $data := index $secret.data $key }}
     {{- if $data }}
-    # DEBUG: DATA OK
+    {{- printf "# DEBUG: DATA OK" }}
       {{- $value = $data }}
     {{- else }}
-      # INFO: ❌ Key '{{ $key }}' NOT found in secret
+        {{- printf "# INFO: ❌ Key '{{ $key }}' NOT found in secret" }}
     {{- end }}
   {{- else }}
-    # INFO: ❌ Secret '{{ $name }}' NOT found in namespace '{{ $namespace }}'
+  {{- printf "# INFO: ❌ Secret '{{ $name }}' NOT found in namespace '{{ $namespace }}'" }}
+
   {{- end }}
 {{- else }}
-  # INFO: Helm version < 3.2.0 — lookup not supported
+    {{- printf "# INFO: Helm version < 3.2.0 — lookup not supported" }}
 {{- end }}
 
 {{- $value }}
@@ -34,10 +35,10 @@
 {{- $gcsSecretValue := "" }}
 
 {{- if kindIs "string" $ctx.Values.gcs.key }}
-# DEBUG: STRING TYPE
+{{- printf "# DEBUG: STRING TYPE" }}
   {{- $gcsSecretValue = $ctx.Values.gcs.key }}
 {{- else if and $ctx.Values.gcs.key.valueFrom.secretKeyRef.name $ctx.Values.gcs.key.valueFrom.secretKeyRef.key }}
-  # DEBUG: OTHER TYPE
+{{- printf "# DEBUG: OTHER TYPE" }}
   {{- $externalValue := include "mychart.getSecretValue" (dict
       "name" $ctx.Values.gcs.key.valueFrom.secretKeyRef.name
       "namespace" $ctx.Release.Namespace
@@ -45,7 +46,7 @@
       "ctx" $ctx) }}
   {{- $gcsSecretValue = $externalValue }}
 {{- else }}
-  # DEBUG: Invalid gcs.key format
+  {{- printf "Invalid gcs.key format" }}
 {{- end }}
 {{- $gcsSecretValue }}
 {{- end }}
