@@ -5,10 +5,16 @@
 {{- $key := .key }}
 {{- $ctx := .ctx }}
 {{- $value := "" }}
+{{- printf "name: %s" $name }}
+{{- printf "$namespace: %s" $namespace }}
+{{- printf "$key: %s" $key }}
+{{- printf "$ctx: %s" $ctx }}
+{{- printf "$value: %s" $value }}
+
   {{- printf "# DEBUG: ENTERED THE FUNCTION" }}
 {{- if semverCompare ">=3.2.0" $ctx.Capabilities.HelmVersion.Version }}
   {{- $secret := lookup "v1" "Secret" $namespace $name }}
-  {{- printf "# DEBUG: LOOKUP SECRET" }}
+  {{- printf "# DEBUG: LOOKUP SECRET namespace: %s, name: %s" $namespace $name }}
   {{- if $secret }}
     {{- printf "# DEBUG: SECRET OK" }}
     {{- $data := index $secret.data $key }}
