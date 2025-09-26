@@ -4,12 +4,12 @@
   install_type: workflow
   helm_path: helm/postgres
   inputs:
-    schema_path: .apolo/src/apolo_apps_postgresql/schemas/ServiceDeploymentInputs.json
+    schema_path: .apolo/src/apolo_apps_postgresql/schemas/PostgresInputs.json
     types_name: PostgresInputs
     processor: PostgresInputsChartValueProcessor
     image: ghcr.io/neuro-inc/mlops-app-crunchy-postgres
   outputs:
-    schema_path: .apolo/src/apolo_apps_postgresql/schemas/ServiceDeploymentOutputs.json
+    schema_path: .apolo/src/apolo_apps_postgresql/schemas/PostgresOutputs.json
     types_name: PostgresOutputs
     processor: PostgresOutputsProcessor
     image: ghcr.io/neuro-inc/mlops-app-crunchy-postgres
