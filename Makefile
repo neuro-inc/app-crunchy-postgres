@@ -53,5 +53,5 @@ push-hook-image:
 
 .PHONY: gen-types-schemas
 gen-types-schemas:
-	app-types dump-types-schema .apolo/src/apolo_apps_postgresql postgresql PostgresInputs .apolo/src/apolo_apps_postgresql/schemas/PostgresInputs.json
-	app-types dump-types-schema .apolo/src/apolo_apps_postgresql postgresql PostgresOutputs .apolo/src/apolo_apps_postgresql/schemas/PostgresOutputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_postgresql PostgresInputs .apolo/src/apolo_apps_postgresql/schemas/PostgresInputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_postgresql PostgresOutputs .apolo/src/apolo_apps_postgresql/schemas/PostgresOutputs.json

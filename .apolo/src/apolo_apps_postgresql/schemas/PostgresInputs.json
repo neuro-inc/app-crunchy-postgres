@@ -123,7 +123,7 @@
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "Image"
+      "x-type": "PostgresUsers"
     },
     "MinioBucketCredentials": {
       "properties": {
@@ -172,7 +172,7 @@
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "Image"
+      "x-type": "PostgresUsers"
     },
     "PGBackupConfig": {
       "properties": {
@@ -321,7 +321,7 @@
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "Image"
+      "x-type": "PostgresUsers"
     },
     "PostgresSupportedVersions": {
       "enum": [
@@ -403,7 +403,7 @@
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "Image"
+      "x-type": "PostgresUsers"
     }
   },
   "properties": {

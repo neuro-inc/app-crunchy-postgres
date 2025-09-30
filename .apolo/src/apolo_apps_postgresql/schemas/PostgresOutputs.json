@@ -279,7 +279,7 @@
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "Image"
+      "x-type": "PostgresUsers"
     },
     "ServiceAPI_WebApp_": {
       "properties": {

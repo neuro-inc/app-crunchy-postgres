@@ -8,13 +8,9 @@ from apolo_app_types import (
 )
 from apolo_app_types.clients.kube import get_crd_objects, get_secret
 from apolo_app_types.outputs.base import BaseAppOutputsProcessor
-from apolo_app_types.protocols.postgres import (
-    PostgresAdminUser,
-    PostgresURI,
-    PostgresUsers,
-)
+from apolo_app_types.protocols.postgres import PostgresURI
 
-from .types import PostgresOutputs
+from .types import PostgresAdminUser, PostgresOutputs, PostgresUsers
 
 
 logger = logging.getLogger()
@@ -130,6 +126,5 @@ class PostgresOutputsProcessor(BaseAppOutputsProcessor[PostgresOutputs]):
         helm_values: dict[str, t.Any],
         app_instance_id: str,
     ) -> PostgresOutputs:
-        return PostgresOutputs.model_validate(
-            **(await get_postgres_outputs(helm_values, app_instance_id))
-        )
+        psql_outputs = await get_postgres_outputs(helm_values, app_instance_id)
+        return PostgresOutputs.model_validate(psql_outputs)
