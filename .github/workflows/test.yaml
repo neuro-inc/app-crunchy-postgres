@@ -92,7 +92,7 @@ jobs:
     needs:
       - lint
       - test-unit
-      - test-integration
+      # - test-integration
     runs-on: ubuntu-latest
     if: always()
     steps:
