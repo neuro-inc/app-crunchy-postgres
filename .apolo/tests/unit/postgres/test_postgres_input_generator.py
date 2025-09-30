@@ -4,10 +4,15 @@ from unittest.mock import AsyncMock
 import apolo_sdk
 import pydantic
 import pytest
+from apolo_apps_postgresql.inputs_processor import PostgresInputsChartValueProcessor
 
 from apolo_app_types import PostgresInputs
-from apolo_app_types.app_types import AppType
 from apolo_app_types.protocols.common import Preset
+from apolo_app_types.protocols.common.buckets import (
+    Bucket,
+    BucketProvider,
+    GCPBucketCredentials,
+)
 from apolo_app_types.protocols.postgres import (
     PGBackupConfig,
     PGBouncer,
@@ -23,12 +28,11 @@ APP_SECRETS_NAME = "apps-secrets"
 APP_ID = "b1aeaf654526474ba22480d00e5b0109"
 
 
-@pytest.mark.asyncio
 async def test_values_postgresql_generation(setup_clients, mock_get_preset_cpu):
-    from apolo_app_types.inputs.args import app_type_to_vals
-
     apolo_client = setup_clients
-    _, helm_params = await app_type_to_vals(
+    processor = PostgresInputsChartValueProcessor(apolo_client)
+
+    helm_params = await processor.gen_extra_values(
         input_=PostgresInputs(
             preset=Preset(
                 name="cpu-large",
@@ -46,12 +50,10 @@ async def test_values_postgresql_generation(setup_clients, mock_get_preset_cpu):
             ),
             backup=PGBackupConfig(),
         ),
-        apolo_client=apolo_client,
-        app_type=AppType.PostgreSQL,
         app_name="psdb",
         namespace=DEFAULT_NAMESPACE,
-        app_secrets_name=APP_SECRETS_NAME,
         app_id=APP_ID,
+        app_secrets_name=APP_SECRETS_NAME,
     )
     assert helm_params["features"] == {"AutoCreateUserSchema": "true"}
     assert len(helm_params["instances"]) == 1
@@ -82,15 +84,14 @@ async def test_values_postgresql_generation(setup_clients, mock_get_preset_cpu):
     }
 
 
-@pytest.mark.asyncio
 async def test_values_postgresql_generation_invalid_name(
     setup_clients, mock_get_preset_cpu
 ):
-    from apolo_app_types.inputs.args import app_type_to_vals
-
     apolo_client = setup_clients
+    processor = PostgresInputsChartValueProcessor(apolo_client)
+
     with pytest.raises(pydantic.ValidationError) as err:
-        _, helm_params = await app_type_to_vals(
+        await processor.gen_extra_values(
             input_=PostgresInputs(
                 preset=Preset(
                     name="cpu-large",
@@ -108,8 +109,6 @@ async def test_values_postgresql_generation_invalid_name(
                 ),
                 backup=PGBackupConfig(),
             ),
-            apolo_client=apolo_client,
-            app_type=AppType.PostgreSQL,
             app_name="psdb",
             namespace=DEFAULT_NAMESPACE,
             app_secrets_name=APP_SECRETS_NAME,
@@ -121,14 +120,13 @@ async def test_values_postgresql_generation_invalid_name(
     )
 
 
-@pytest.mark.asyncio
 async def test_values_postgresql_generation_with_user(
     setup_clients, mock_get_preset_cpu
 ):
-    from apolo_app_types.inputs.args import app_type_to_vals
-
     apolo_client = setup_clients
-    _, helm_params = await app_type_to_vals(
+    processor = PostgresInputsChartValueProcessor(apolo_client)
+
+    helm_params = await processor.gen_extra_values(
         input_=PostgresInputs(
             preset=Preset(
                 name="cpu-large",
@@ -146,8 +144,6 @@ async def test_values_postgresql_generation_with_user(
             ),
             backup=None,
         ),
-        apolo_client=apolo_client,
-        app_type=AppType.PostgreSQL,
         app_name="psdb",
         namespace=DEFAULT_NAMESPACE,
         app_secrets_name=APP_SECRETS_NAME,
@@ -177,15 +173,14 @@ async def test_values_postgresql_generation_with_user(
     assert "azure" not in helm_params
 
 
-@pytest.mark.asyncio
 async def test_values_postgresql_generation_without_user(
     setup_clients, mock_get_preset_cpu
 ):
-    from apolo_app_types.inputs.args import app_type_to_vals
-
     apolo_client = setup_clients
+    processor = PostgresInputsChartValueProcessor(apolo_client)
+
     with pytest.raises(pydantic.ValidationError):
-        _, helm_params = await app_type_to_vals(
+        await processor.gen_extra_values(
             input_=PostgresInputs(
                 preset=Preset(
                     name="cpu-large",
@@ -203,8 +198,6 @@ async def test_values_postgresql_generation_without_user(
                 ),
                 backup=None,
             ),
-            apolo_client=apolo_client,
-            app_type=AppType.PostgreSQL,
             app_name="psdb",
             namespace=DEFAULT_NAMESPACE,
             app_secrets_name=APP_SECRETS_NAME,
@@ -212,15 +205,14 @@ async def test_values_postgresql_generation_without_user(
         )
 
 
-@pytest.mark.asyncio
 async def test_values_postgresql_generation_with_postgres_user(
     setup_clients, mock_get_preset_cpu
 ):
-    from apolo_app_types.inputs.args import app_type_to_vals
-
     apolo_client = setup_clients
+    processor = PostgresInputsChartValueProcessor(apolo_client)
+
     with pytest.raises(pydantic.ValidationError):
-        _, helm_params = await app_type_to_vals(
+        await processor.gen_extra_values(
             input_=PostgresInputs(
                 preset=Preset(
                     name="cpu-large",
@@ -238,8 +230,6 @@ async def test_values_postgresql_generation_with_postgres_user(
                 ),
                 backup=None,
             ),
-            apolo_client=apolo_client,
-            app_type=AppType.PostgreSQL,
             app_name="psdb",
             namespace=DEFAULT_NAMESPACE,
             app_secrets_name=APP_SECRETS_NAME,
@@ -247,13 +237,12 @@ async def test_values_postgresql_generation_with_postgres_user(
         )
 
 
-@pytest.mark.asyncio
 async def test_values_postgresql_generation_with_minio(
     setup_clients, mock_get_preset_cpu
 ):
-    from apolo_app_types.inputs.args import app_type_to_vals
-
     apolo_client = setup_clients
+    processor = PostgresInputsChartValueProcessor(apolo_client)
+
     mock_bucket = apolo_sdk.Bucket(
         id="bucket-id",
         owner="owner",
@@ -291,7 +280,7 @@ async def test_values_postgresql_generation_with_minio(
         return_value=p_credentials
     )
 
-    _, helm_params = await app_type_to_vals(
+    helm_params = await processor.gen_extra_values(
         input_=PostgresInputs(
             preset=Preset(name="cpu-large"),
             postgres_config=PostgresConfig(
@@ -303,8 +292,6 @@ async def test_values_postgresql_generation_with_minio(
             pg_bouncer=PGBouncer(preset=Preset(name="cpu-large")),
             backup=PGBackupConfig(),
         ),
-        apolo_client=apolo_client,
-        app_type=AppType.PostgreSQL,
         app_name="psdb",
         namespace=DEFAULT_NAMESPACE,
         app_secrets_name=APP_SECRETS_NAME,
@@ -338,47 +325,43 @@ async def test_values_postgresql_generation_with_minio(
     }
 
 
-# Disabled while we don't have proper buckets integration
-# @pytest.mark.asyncio
-# async def test_values_postgresql_generation_without_matching_bucket_and_creds(
-#     setup_clients, mock_get_preset_cpu
-# ):
-#     from apolo_app_types.inputs.args import app_type_to_vals
+async def test_values_postgresql_generation_without_matching_bucket_and_creds(
+    setup_clients, mock_get_preset_cpu
+):
+    apolo_client = setup_clients
+    processor = PostgresInputsChartValueProcessor(apolo_client)
 
-#     apolo_client = setup_clients
-#     with pytest.raises(pydantic.ValidationError):
-#         _, helm_params = await app_type_to_vals(
-#             input_=PostgresInputs(
-#                 preset=Preset(
-#                     name="cpu-large",
-#                 ),
-#                 postgres=PostgresConfig(
-#                     postgres_version=PostgresSupportedVersions.v16,
-#                     instance_replicas=3,
-#                     instance_size=1,
-#                     db_users=[],
-#                 ),
-#                 pg_bouncer=PGBouncer(
-#                     preset=Preset(
-#                         name="cpu-large",
-#                     ),
-#                 ),
-#                 backup_bucket=Bucket(
-#                     id="some_id",
-#                     owner="some_owner",
-#                     details={},
-#                     credentials=[
-#                         GCPBucketCredentials(
-#                             name="some_name",
-#                             key_data="U29tZSB0ZXh0",
-#                         )
-#                     ],
-#                     bucket_provider=BucketProvider.AWS,
-#                 ),
-#             ),
-#             apolo_client=apolo_client,
-#             app_type=AppType.PostgreSQL,
-#             app_name="psdb",
-#             namespace=DEFAULT_NAMESPACE,
-#             app_secrets_name=APP_SECRETS_NAME,
-#         )
+    with pytest.raises(pydantic.ValidationError):
+        await processor.gen_extra_values(
+            input_=PostgresInputs(
+                preset=Preset(
+                    name="cpu-large",
+                ),
+                postgres=PostgresConfig(
+                    postgres_version=PostgresSupportedVersions.v16,
+                    instance_replicas=3,
+                    instance_size=1,
+                    db_users=[],
+                ),
+                pg_bouncer=PGBouncer(
+                    preset=Preset(
+                        name="cpu-large",
+                    ),
+                ),
+                backup_bucket=Bucket(
+                    id="some_id",
+                    owner="some_owner",
+                    details={},
+                    credentials=[
+                        GCPBucketCredentials(
+                            name="some_name",
+                            key_data="U29tZSB0ZXh0",
+                        )
+                    ],
+                    bucket_provider=BucketProvider.AWS,
+                ),
+            ),
+            app_name="psdb",
+            namespace=DEFAULT_NAMESPACE,
+            app_secrets_name=APP_SECRETS_NAME,
+        )
