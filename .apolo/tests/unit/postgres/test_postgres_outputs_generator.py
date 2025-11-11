@@ -4,7 +4,7 @@ from apolo_apps_postgresql.outputs_processor import PostgresOutputsProcessor
 async def test_postgres_outputs(setup_clients, mock_kubernetes_client, app_instance_id):
     processor = PostgresOutputsProcessor()
     res = await processor.generate_outputs(
-        helm_values={}, app_instance_id=app_instance_id
+        helm_values={"APOLO_PASSED_CONFIG": "{}"}, app_instance_id=app_instance_id
     )
     assert res["postgres_users"]["users"] == [
         {
