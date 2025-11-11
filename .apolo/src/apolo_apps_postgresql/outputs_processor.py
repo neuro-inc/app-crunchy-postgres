@@ -173,6 +173,8 @@ async def get_postgres_outputs(
     helm_values: dict[str, t.Any],
     app_instance_id: str,
 ) -> dict[str, t.Any]:
+    os.environ["APOLO_PASSED_CONFIG"] = helm_values["APOLO_PASSED_CONFIG"]
+
     pg_cluster = get_postgres_cluster(
         app_instance_id=app_instance_id,
     )
