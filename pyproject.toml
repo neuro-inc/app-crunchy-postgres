@@ -25,6 +25,7 @@ yarl = "^1.18.3"
 apolo-app-types = {version = "^25.10.13", extras = ["fixtures"]}
 pre-commit = "^4.2.0"
 multidict = "^6.6.4"
+tenacity = "^9.1.2"
 
 [tool.poetry.group.dev]
 optional = true
