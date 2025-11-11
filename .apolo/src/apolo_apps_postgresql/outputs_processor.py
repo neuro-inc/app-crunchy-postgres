@@ -16,7 +16,7 @@ from apolo_app_types.protocols.postgres import PostgresURI
 
 from .types import PostgresAdminUser, PostgresOutputs, PostgresUsers
 
-
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 MAX_SLEEP_SEC = 10
