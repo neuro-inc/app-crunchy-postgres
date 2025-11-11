@@ -1,5 +1,23 @@
 {
   "$defs": {
+    "ApoloSecret": {
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "ApoloSecret",
+      "type": "object",
+      "x-description": "Apolo Secret Configuration.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Secret",
+      "x-type": "ApoloSecret"
+    },
     "CrunchyPostgresUserCredentials": {
       "properties": {
         "user": {
@@ -11,11 +29,8 @@
           "x-title": "Postgres User"
         },
         "password": {
-          "title": "Password",
-          "type": "string",
+          "$ref": "#/$defs/ApoloSecret",
           "x-description": "Password for the Postgres user.",
-          "x-is-advanced-field": false,
-          "x-meta-type": "inline",
           "x-title": "Postgres Password"
         },
         "host": {
@@ -67,50 +82,46 @@
         "jdbc_uri": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/ApoloSecret"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Jdbc Uri"
+          "default": null
         },
         "pgbouncer_jdbc_uri": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/ApoloSecret"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Pgbouncer Jdbc Uri"
+          "default": null
         },
         "pgbouncer_uri": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/ApoloSecret"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Pgbouncer Uri"
+          "default": null
         },
         "uri": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/ApoloSecret"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Uri"
+          "default": null
         },
         "postgres_uri": {
           "anyOf": [
@@ -157,11 +168,8 @@
           "x-title": "Postgres User"
         },
         "password": {
-          "title": "Password",
-          "type": "string",
+          "$ref": "#/$defs/ApoloSecret",
           "x-description": "Password for the Postgres user.",
-          "x-is-advanced-field": false,
-          "x-meta-type": "inline",
           "x-title": "Postgres Password"
         },
         "host": {
@@ -225,11 +233,8 @@
       "description": "Configuration for the Postgres connection URI.",
       "properties": {
         "uri": {
-          "title": "Uri",
-          "type": "string",
+          "$ref": "#/$defs/ApoloSecret",
           "x-description": "Specify full Postgres connection URI. E.g. 'postgresql://user:pass@host:5432/db'",
-          "x-is-advanced-field": false,
-          "x-meta-type": "inline",
           "x-title": "URI"
         }
       },

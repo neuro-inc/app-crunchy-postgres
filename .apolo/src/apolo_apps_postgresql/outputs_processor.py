@@ -10,9 +10,9 @@ from apolo_app_types import (
 )
 from apolo_app_types.clients.kube import get_crd_objects, get_secret
 from apolo_app_types.outputs.base import BaseAppOutputsProcessor
+from apolo_app_types.outputs.utils.apolo_secrets import create_apolo_secret
 from apolo_app_types.protocols.common import ApoloSecret
 from apolo_app_types.protocols.postgres import PostgresURI
-from apolo_app_types.outputs.utils.apolo_secrets import create_apolo_secret
 
 from .types import PostgresAdminUser, PostgresOutputs, PostgresUsers
 
