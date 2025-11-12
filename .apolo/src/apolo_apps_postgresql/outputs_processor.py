@@ -13,7 +13,6 @@ from apolo_app_types.clients.kube import get_crd_objects, get_secret
 from apolo_app_types.outputs.base import BaseAppOutputsProcessor
 from apolo_app_types.outputs.utils.apolo_secrets import create_apolo_secret
 from apolo_app_types.protocols.common import ApoloSecret
-from apolo_app_types.protocols.postgres import PostgresURI
 
 from .types import PostgresAdminUser, PostgresOutputs, PostgresUsers
 
@@ -109,25 +108,8 @@ async def postgres_creds_from_kube_secret_data(
         return uri_value
 
     # Create secrets for optional URI fields if they exist
-    jdbc_uri = None
-    jdbc_uri_value = maybe_replace_db(_b64decode(secret_data.get("jdbc-uri")))
-    if jdbc_uri_value:
-        jdbc_uri = await create_apolo_secret_with_retry(
-            app_instance_id=app_instance_id,
-            key=f"postgres-{user}{db_suffix}-jdbc-uri",
-            value=jdbc_uri_value,
-        )
-
-    pgbouncer_jdbc_uri = None
-    pgbouncer_jdbc_uri_value = maybe_replace_db(
-        _b64decode(secret_data.get("pgbouncer-jdbc-uri"))
-    )
-    if pgbouncer_jdbc_uri_value:
-        pgbouncer_jdbc_uri = await create_apolo_secret_with_retry(
-            app_instance_id=app_instance_id,
-            key=f"postgres-{user}{db_suffix}-pgbouncer-jdbc-uri",
-            value=pgbouncer_jdbc_uri_value,
-        )
+    # Note: jdbc_uri and pgbouncer_jdbc_uri are now computed async methods
+    # and don't need to be stored as secrets
 
     pgbouncer_uri = None
     pgbouncer_uri_value = maybe_replace_db(_b64decode(secret_data.get("pgbouncer-uri")))
@@ -138,16 +120,9 @@ async def postgres_creds_from_kube_secret_data(
             value=pgbouncer_uri_value,
         )
 
-    uri = None
-    uri_value = maybe_replace_db(_b64decode(secret_data.get("uri")))
-    if uri_value:
-        uri = await create_apolo_secret_with_retry(
-            app_instance_id=app_instance_id,
-            key=f"postgres-{user}{db_suffix}-uri",
-            value=uri_value,
-        )
-
-    # Create secret for the postgres connection string
+    # Create secret for the postgres connection string (postgres_uri.uri)
+    # Note: The standalone 'uri' field has been removed
+    # as it's redundant with postgres_uri.uri
     postgres_uri_secret = await create_apolo_secret_with_retry(
         app_instance_id=app_instance_id,
         key=f"postgres-{user}{db_suffix}-connection-uri",
@@ -162,11 +137,8 @@ async def postgres_creds_from_kube_secret_data(
         pgbouncer_host=pgbouncer_host,
         pgbouncer_port=int(pgbouncer_port),
         dbname=dbname,
-        jdbc_uri=jdbc_uri,
-        pgbouncer_jdbc_uri=pgbouncer_jdbc_uri,
         pgbouncer_uri=pgbouncer_uri,
-        uri=uri,
-        postgres_uri=PostgresURI(uri=postgres_uri_secret),
+        postgres_uri=postgres_uri_secret,
     )
 
 
