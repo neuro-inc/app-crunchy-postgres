@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 import typing as t
 
 import apolo_sdk
@@ -253,4 +254,11 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
 
         backup_values = await self._get_backup_config(input_, app_name)
 
-        return merge_list_of_dicts([backup_values, values])
+        # Add image configuration for cleanup job
+        image_values = {
+            "apolo-hooks": {
+                "image": {"tag": os.getenv("APP_IMAGE_TAG", "latest")},
+            },
+        }
+
+        return merge_list_of_dicts([backup_values, values, image_values])

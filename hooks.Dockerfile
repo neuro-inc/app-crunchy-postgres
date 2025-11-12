@@ -2,6 +2,9 @@ FROM python:3.12-slim
 
 LABEL org.opencontainers.image.source="https://github.com/neuro-inc/mlops-custom-deployment-app"
 
+ARG APP_IMAGE_TAG=latest
+ENV APP_IMAGE_TAG=$APP_IMAGE_TAG
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_NO_INTERACTION=1 \

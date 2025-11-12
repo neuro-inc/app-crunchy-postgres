@@ -52,6 +52,17 @@ jobs:
     steps:
       - name: Checkout commit
         uses: actions/checkout@v4
+      - name: Set APP_IMAGE_TAG
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BRANCH_NAME=${{ github.head_ref }}
+            export APP_IMAGE_TAG=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_.-]/-/g')
+          elif [ "${{ github.ref }}" = "refs/heads/apolo" ]; then
+            export APP_IMAGE_TAG=apolo
+          else
+            export APP_IMAGE_TAG=${GITHUB_REF#refs/tags/}
+          fi
+          echo "APP_IMAGE_TAG=${APP_IMAGE_TAG}" >> $GITHUB_ENV
       - name: Login to ghcr.io
         uses: docker/login-action@v3.5.0
         with:
@@ -60,6 +71,7 @@ jobs:
           password: ${{ github.token }}
       - name: Build image
         run: |
+          export APP_IMAGE_TAG=${{ env.APP_IMAGE_TAG }}
           make build-hook-image
       - name: Release branch image
         if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
@@ -69,9 +81,9 @@ jobs:
           export IMAGE_TAG=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_.-]/-/g')
           make push-hook-image
       - name: Release development image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/apolo'
         run: |
-          export IMAGE_TAG=master
+          export IMAGE_TAG=apolo
           make push-hook-image
       - name: Release prod image
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
