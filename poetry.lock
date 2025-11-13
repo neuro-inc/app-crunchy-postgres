@@ -250,14 +250,14 @@ trio = ["trio (>=0.31.0)"]
 
 [[package]]
 name = "apolo-app-types"
-version = "25.11.3"
+version = "25.11.4"
 description = "Apolo Platform App Types."
 optional = false
 python-versions = "<4.0,>=3.9.0"
 groups = ["main"]
 files = [
-    {file = "apolo_app_types-25.11.3-py3-none-any.whl", hash = "sha256:5f4d6e823dfe38b60d3ec58d6bf083a8fe18a6cdd0fc6aeaa8491a57e735f59c"},
-    {file = "apolo_app_types-25.11.3.tar.gz", hash = "sha256:a5baf384d10d71d697c03fef68f3107fc104de221f34de5a65839a83cba6ac67"},
+    {file = "apolo_app_types-25.11.4-py3-none-any.whl", hash = "sha256:38108f1661930daf5086156bf375709fbb17d53faa044c91474787c4076bb85a"},
+    {file = "apolo_app_types-25.11.4.tar.gz", hash = "sha256:1c256bfa78605e5e50594ec56765629d3d553bcf0c9c1db61fbefda8c0ce6842"},
 ]
 
 [package.dependencies]
@@ -274,14 +274,14 @@ yarl = ">=1.22.0,<2.0.0"
 
 [[package]]
 name = "apolo-sdk"
-version = "25.11.0"
+version = "25.11.1"
 description = "Apolo SDK"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "apolo_sdk-25.11.0-py3-none-any.whl", hash = "sha256:b437916d3fff16ff7c2a1f76c0e0114dc437fc41cffb765fd9766243669baf78"},
-    {file = "apolo_sdk-25.11.0.tar.gz", hash = "sha256:6bbad71e12eddf333504de0465ab8d0dc05e55603f8ec3fcef5c92548490f53b"},
+    {file = "apolo_sdk-25.11.1-py3-none-any.whl", hash = "sha256:b94cfcfa5b28cd5b93d92945e2b0095e50ccf57df8708ff6f1c9cbd32bddd222"},
+    {file = "apolo_sdk-25.11.1.tar.gz", hash = "sha256:9d813c1ff7aefab115b30e395b4e5d1bc55b75a630557658686ad535d272847f"},
 ]
 
 [package.dependencies]
@@ -2473,4 +2473,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11.0,<4.0"
-content-hash = "4a504953a8b34bdd789d6b9503717d0787ca3d65dd0c7b4640f2cf7d3e019387"
+content-hash = "c0f683936a1e80df4db383bff63a4bed4c10f179b8db05c709a258a3fe735a9b"
