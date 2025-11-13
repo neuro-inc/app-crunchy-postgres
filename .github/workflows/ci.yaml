@@ -71,7 +71,7 @@ jobs:
           password: ${{ github.token }}
       - name: Build image
         run: |
-          export APP_IMAGE_TAG=${{ env.APP_IMAGE_TAG }}
+          export IMAGE_TAG=${{ env.APP_IMAGE_TAG }}
           make build-hook-image
       - name: Release branch image
         if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
