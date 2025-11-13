@@ -24,10 +24,10 @@ async def delete_secret_with_retry(secret_key: str) -> None:
     Retries up to 5 times with delays: 2s, 4s, 8s, 16s, 32s.
     Logs warnings on failure but does not raise exceptions on final failure.
     """
-    logger.info(f'Deleting secret "{secret_key}"')
+    logger.info('Deleting secret "%s"', secret_key)
     async with apolo_sdk.get() as client:
         await client.secrets.rm(key=secret_key)
-    logger.info(f'Successfully deleted secret "{secret_key}"')
+    logger.info('Successfully deleted secret "%s"', secret_key)
 
 
 async def get_app_outputs(app_id: str) -> PostgresOutputs | None:
@@ -52,7 +52,7 @@ async def cleanup_secrets() -> int:
             await delete_secret_with_retry(secret_key=secret.key)
         except Exception as e:
             logger.error(
-                f'Failed to delete secret "{secret.key}" ' f"after all retries: {e}"
+                'Failed to delete secret "%s" after all retries: %s', secret.key, e
             )
     return 0
 

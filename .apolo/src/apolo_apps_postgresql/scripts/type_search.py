@@ -6,7 +6,7 @@ from pydantic import BaseModel
 T = TypeVar("T")
 
 
-def find_instances_recursive(
+def find_instances_recursive(  # noqa: C901
     obj: Any, target_type: type[T], visited: set[Any] | None = None, _path: str = ""
 ) -> list[tuple[str, T]]:
     """
@@ -21,7 +21,8 @@ def find_instances_recursive(
 
     Returns:
         List of tuples containing (path, instance) for each match found
-        Example: [('user.address', <Address object>), ('user.billing_address', <Address object>)]
+        Example: [('user.address', <Address object>),
+                  ('user.billing_address', <Address object>)]
     """
     if visited is None:
         visited = set()
@@ -47,7 +48,7 @@ def find_instances_recursive(
             )
 
     # Handle lists and tuples
-    elif isinstance(obj, (list, tuple)):
+    elif isinstance(obj, list | tuple):
         for idx, item in enumerate(obj):
             item_path = f"{_path}[{idx}]" if _path else f"[{idx}]"
             results.extend(
