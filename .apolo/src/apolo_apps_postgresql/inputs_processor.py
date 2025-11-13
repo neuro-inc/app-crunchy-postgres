@@ -242,6 +242,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                 "name": f"{postgrescluster_crd_name}-init-sql",
                 "key": "bootstrap.sql",
             },
+            "apolo_app_id": app_id,
         }
         users_config = self._create_users_config(input_.postgres_config.db_users)
 
