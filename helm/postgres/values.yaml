@@ -46,6 +46,17 @@ postgresVersion: 17
 # on for `instrumentation` to be turned on.
 # instrumentation: false
 
+##################################
+# Apolo App Image Configuration #
+##################################
+
+# Image for outputs processor and cleanup scripts
+# These values are typically set by the Apolo Apps platform during deployment
+apolo-hooks:
+  image:
+    repository: ghcr.io/neuro-inc/mlops-app-crunchy-postgres
+    tag: latest
+
 ###################
 # Image Overrides #
 ###################

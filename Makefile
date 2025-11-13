@@ -42,6 +42,7 @@ test-integration:
 .PHONY: build-hook-image
 build-hook-image:
 	docker build \
+		--build-arg APP_IMAGE_TAG=$(IMAGE_TAG) \
 		-t $(IMAGE_NAME):latest \
 		-f hooks.Dockerfile \
 		.;

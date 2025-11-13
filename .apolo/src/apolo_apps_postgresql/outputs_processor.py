@@ -1,22 +1,48 @@
 import asyncio
 import base64
 import logging
+import os
 import typing as t
+
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from apolo_app_types import (
     CrunchyPostgresUserCredentials,
 )
 from apolo_app_types.clients.kube import get_crd_objects, get_secret
 from apolo_app_types.outputs.base import BaseAppOutputsProcessor
-from apolo_app_types.protocols.postgres import PostgresURI
+from apolo_app_types.outputs.utils.apolo_secrets import create_apolo_secret
+from apolo_app_types.protocols.common import ApoloSecret
 
 from .types import PostgresAdminUser, PostgresOutputs, PostgresUsers
 
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 MAX_SLEEP_SEC = 10
 POSTGRES_ADMIN_USERNAME = "postgres"
+
+
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(exp_base=2, multiplier=2),
+)
+async def create_apolo_secret_with_retry(
+    app_instance_id: str, key: str, value: str
+) -> ApoloSecret:
+    """
+    Attempt to create an Apolo secret with retry logic using exponential backoff.
+    Retries up to 5 times with delays: 2s, 4s, 8s, 16s, 32s.
+    Returns the secret reference on success.
+    Raises exception if all retries fail.
+    """
+    logger.info('Creating secret "%s-%s"', key, app_instance_id)
+    result = await create_apolo_secret(
+        app_instance_id=app_instance_id, key=key, value=value
+    )
+    logger.info('Successfully created secret "%s-%s"', key, app_instance_id)
+    return result
 
 
 def get_postgres_cluster(app_instance_id: str) -> dict[str, t.Any]:
@@ -32,9 +58,20 @@ def get_postgres_cluster(app_instance_id: str) -> dict[str, t.Any]:
     return pg_clusters["items"][0]
 
 
-def postgres_creds_from_kube_secret_data(
+async def postgres_creds_from_kube_secret_data(
     secret_data: dict[str, str],
+    app_instance_id: str,
+    database_override: str | None = None,
 ) -> CrunchyPostgresUserCredentials:
+    """
+    Create Postgres user credentials from Kubernetes secret data.
+
+    Args:
+        secret_data: Base64-encoded secret data from Kubernetes
+        app_instance_id: Application instance ID for secret naming
+        database_override: If provided, use this database name instead of the one
+                          in secret_data and replace database names in all URIs
+    """
     T = t.TypeVar("T", str, str | None)
 
     def _b64decode(s: T) -> T:
@@ -43,15 +80,53 @@ def postgres_creds_from_kube_secret_data(
         return base64.b64decode(s).decode()
 
     user = _b64decode(secret_data["user"])
-    password = _b64decode(secret_data["password"])
+    password_value = _b64decode(secret_data["password"])
     host = _b64decode(secret_data["host"])
     port = _b64decode(secret_data["port"])
     pgbouncer_host = _b64decode(secret_data["pgbouncer-host"])
     pgbouncer_port = _b64decode(secret_data["pgbouncer-port"])
-    dbname = _b64decode(secret_data.get("dbname"))
+    original_dbname = _b64decode(secret_data.get("dbname"))
 
-    postgres_conn_string = (
-        f"postgresql://{user}:{password}@{pgbouncer_host}:{pgbouncer_port}/{dbname}"
+    # Use override database or the original
+    dbname = database_override if database_override is not None else original_dbname
+    # Include database in secret key if it's an override
+    db_suffix = f"-{dbname}" if database_override else ""
+
+    postgres_conn_string = f"postgresql://{user}:{password_value}@{pgbouncer_host}:{pgbouncer_port}/{dbname}"
+
+    # Create Apolo secrets for all sensitive fields
+    password = await create_apolo_secret_with_retry(
+        app_instance_id=app_instance_id,
+        key=f"postgres-{user}-password",
+        value=password_value,
+    )
+
+    # Helper to replace database in URI if override is provided
+    def maybe_replace_db(uri_value: str | None) -> str | None:
+        if uri_value and database_override and original_dbname:
+            return uri_value.replace(f"/{original_dbname}", f"/{database_override}")
+        return uri_value
+
+    # Create secrets for optional URI fields if they exist
+    # Note: jdbc_uri and pgbouncer_jdbc_uri are now computed async methods
+    # and don't need to be stored as secrets
+
+    pgbouncer_uri = None
+    pgbouncer_uri_value = maybe_replace_db(_b64decode(secret_data.get("pgbouncer-uri")))
+    if pgbouncer_uri_value:
+        pgbouncer_uri = await create_apolo_secret_with_retry(
+            app_instance_id=app_instance_id,
+            key=f"postgres-{user}{db_suffix}-pgbouncer-uri",
+            value=pgbouncer_uri_value,
+        )
+
+    # Create secret for the postgres connection string (postgres_uri.uri)
+    # Note: The standalone 'uri' field has been removed
+    # as it's redundant with postgres_uri.uri
+    postgres_uri_secret = await create_apolo_secret_with_retry(
+        app_instance_id=app_instance_id,
+        key=f"postgres-{user}{db_suffix}-connection-uri",
+        value=postgres_conn_string,
     )
 
     return CrunchyPostgresUserCredentials(
@@ -62,11 +137,8 @@ def postgres_creds_from_kube_secret_data(
         pgbouncer_host=pgbouncer_host,
         pgbouncer_port=int(pgbouncer_port),
         dbname=dbname,
-        jdbc_uri=_b64decode(secret_data.get("jdbc-uri")),
-        pgbouncer_jdbc_uri=_b64decode(secret_data.get("pgbouncer-jdbc-uri")),
-        pgbouncer_uri=_b64decode(secret_data.get("pgbouncer-uri")),
-        uri=_b64decode(secret_data.get("uri")),
-        postgres_uri=PostgresURI(uri=postgres_conn_string),
+        pgbouncer_uri=pgbouncer_uri,
+        postgres_uri=postgres_uri_secret,
     )
 
 
@@ -74,6 +146,8 @@ async def get_postgres_outputs(
     helm_values: dict[str, t.Any],
     app_instance_id: str,
 ) -> dict[str, t.Any]:
+    os.environ["APOLO_PASSED_CONFIG"] = helm_values["APOLO_PASSED_CONFIG"]
+
     pg_cluster = get_postgres_cluster(
         app_instance_id=app_instance_id,
     )
@@ -107,7 +181,7 @@ async def get_postgres_outputs(
     admin_user = None
 
     for item in secrets.items:
-        user = postgres_creds_from_kube_secret_data(item.data)
+        user = await postgres_creds_from_kube_secret_data(item.data, app_instance_id)
         if user.user == POSTGRES_ADMIN_USERNAME:
             admin_user = user
             continue
@@ -118,7 +192,11 @@ async def get_postgres_outputs(
         for db in requested_dbs:
             if user.dbname == db:
                 continue
-            users.append(user.with_database(db))
+            # Create new credentials for this database with proper secrets
+            db_user = await postgres_creds_from_kube_secret_data(
+                item.data, app_instance_id, database_override=db
+            )
+            users.append(db_user)
     if admin_user:
         admin = PostgresAdminUser(
             **{**admin_user.model_dump(exclude={"dbname"}), "user_type": "admin"}

@@ -13,6 +13,7 @@
     types_name: PostgresOutputs
     processor: PostgresOutputsProcessor
     image: ghcr.io/neuro-inc/mlops-app-crunchy-postgres
+  requires_token: true
   short_description: Deploy PostgreSQL cluster on Apolo platform
   app_package_name: apolo_apps_postgresql
   logo: https://storage.googleapis.com/development-421920-assets/app-logos/postgresql.svg

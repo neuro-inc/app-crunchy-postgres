@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 import typing as t
 
 import apolo_sdk
@@ -241,6 +242,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                 "name": f"{postgrescluster_crd_name}-init-sql",
                 "key": "bootstrap.sql",
             },
+            "apolo_app_id": app_id,
         }
         users_config = self._create_users_config(input_.postgres_config.db_users)
 
@@ -253,4 +255,11 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
 
         backup_values = await self._get_backup_config(input_, app_name)
 
-        return merge_list_of_dicts([backup_values, values])
+        # Add image configuration for cleanup job
+        image_values = {
+            "apolo-hooks": {
+                "image": {"tag": os.getenv("APP_IMAGE_TAG", "latest")},
+            },
+        }
+
+        return merge_list_of_dicts([backup_values, values, image_values])
