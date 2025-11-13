@@ -55,7 +55,7 @@ def mock_apolo_client():
     """Mock apolo_sdk.get() context manager."""
     mock_client = MagicMock()
     mock_client.secrets.rm = AsyncMock()
-    mock_client.apps.get_output = MagicMock()
+    mock_client.apps.get_output = AsyncMock()
 
     mock_context = AsyncMock()
     mock_context.__aenter__.return_value = mock_client

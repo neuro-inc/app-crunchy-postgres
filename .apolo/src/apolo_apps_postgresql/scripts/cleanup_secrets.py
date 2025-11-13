@@ -32,7 +32,7 @@ async def delete_secret_with_retry(secret_key: str) -> None:
 
 async def get_app_outputs(app_id: str) -> PostgresOutputs | None:
     async with apolo_sdk.get() as client:
-        output = client.apps.get_output(app_id=app_id)
+        output = await client.apps.get_output(app_id=app_id)
     if output:
         return PostgresOutputs.model_validate(output)
     return None
