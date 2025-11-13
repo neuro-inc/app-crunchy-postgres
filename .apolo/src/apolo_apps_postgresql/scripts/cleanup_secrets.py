@@ -1,14 +1,18 @@
+import asyncio
+import logging
 import os
 import sys
+
 import apolo_sdk
-import asyncio
-from apolo_apps_postgresql.types import PostgresOutputs
 from tenacity import retry, stop_after_attempt, wait_exponential
-import logging
-from apolo_apps_postgresql.scripts.type_search import find_instances_recursive_simple
+
 from apolo_app_types.protocols.common import ApoloSecret
+from apolo_apps_postgresql.scripts.type_search import find_instances_recursive_simple
+from apolo_apps_postgresql.types import PostgresOutputs
+
 
 logger = logging.getLogger(__name__)
+
 
 @retry(
     stop=stop_after_attempt(5),
@@ -33,6 +37,7 @@ async def get_app_outputs(app_id: str) -> PostgresOutputs | None:
         return PostgresOutputs.model_validate(output)
     return None
 
+
 async def cleanup_secrets() -> int:
     app_id_str = os.environ.get("APP_ID")
     if not app_id_str:
@@ -41,16 +46,13 @@ async def cleanup_secrets() -> int:
 
     app_outputs = await get_app_outputs(app_id=app_id_str)
     secrets = find_instances_recursive_simple(obj=app_outputs, target_type=ApoloSecret)
-    
+
     for secret in secrets:
         try:
-            await delete_secret_with_retry(
-                secret_key=secret.key
-            )
+            await delete_secret_with_retry(secret_key=secret.key)
         except Exception as e:
             logger.error(
-                f'Failed to delete secret "{secret.key}" '
-                f"after all retries: {e}"
+                f'Failed to delete secret "{secret.key}" ' f"after all retries: {e}"
             )
     return 0
 
@@ -66,5 +68,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
-

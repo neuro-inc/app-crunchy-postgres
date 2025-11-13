@@ -1,6 +1,6 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-import os
-from unittest.mock import AsyncMock, MagicMock, patch, call
 from apolo_apps_postgresql.scripts.cleanup_secrets import (
     cleanup_secrets,
     delete_secret_with_retry,
@@ -8,11 +8,13 @@ from apolo_apps_postgresql.scripts.cleanup_secrets import (
     main,
 )
 from apolo_apps_postgresql.types import (
+    PostgresAdminUser,
     PostgresOutputs,
     PostgresUsers,
-    PostgresAdminUser,
 )
-from apolo_app_types import CrunchyPostgresUserCredentials, ApoloSecret
+from tenacity import RetryError
+
+from apolo_app_types import ApoloSecret, CrunchyPostgresUserCredentials
 
 
 @pytest.fixture
@@ -87,7 +89,9 @@ class TestCleanupSecrets:
         monkeypatch.setenv("APP_ID", "test-app-123")
 
         mock_client, mock_context = mock_apolo_client
-        mock_client.apps.get_output.return_value = complete_postgres_outputs.model_dump()
+        mock_client.apps.get_output.return_value = (
+            complete_postgres_outputs.model_dump()
+        )
 
         with patch(
             "apolo_apps_postgresql.scripts.cleanup_secrets.apolo_sdk.get",
@@ -100,7 +104,9 @@ class TestCleanupSecrets:
         assert mock_client.secrets.rm.call_count == 4
 
         # Verify the correct secrets were targeted
-        deleted_keys = {call.kwargs["key"] for call in mock_client.secrets.rm.call_args_list}
+        deleted_keys = {
+            call.kwargs["key"] for call in mock_client.secrets.rm.call_args_list
+        }
         assert deleted_keys == {
             "postgres-admin-password",
             "postgres-appuser-password",
@@ -139,15 +145,19 @@ class TestCleanupSecrets:
         monkeypatch.setenv("APP_ID", "test-app-123")
 
         mock_client, mock_context = mock_apolo_client
-        mock_client.apps.get_output.return_value = complete_postgres_outputs.model_dump()
+        mock_client.apps.get_output.return_value = (
+            complete_postgres_outputs.model_dump()
+        )
 
         # Make first deletion fail, rest succeed
         call_count = 0
+
         async def mock_rm_with_failure(key):
             nonlocal call_count
             call_count += 1
             if call_count == 1:
-                raise Exception("Temporary API error")
+                msg = "Temporary API error"
+                raise Exception(msg)
 
         mock_client.secrets.rm.side_effect = mock_rm_with_failure
 
@@ -159,7 +169,8 @@ class TestCleanupSecrets:
 
         # Should complete and attempt all deletions despite errors
         assert result == 0
-        # First secret fails once then succeeds (2 calls), plus 3 other secrets = 5 total
+        # First secret fails once then succeeds (2 calls),
+        # plus 3 other secrets = 5 total
         assert mock_client.secrets.rm.call_count == 5
 
     @pytest.mark.asyncio
@@ -229,7 +240,7 @@ class TestDeleteSecretWithRetry:
             "apolo_apps_postgresql.scripts.cleanup_secrets.apolo_sdk.get",
             return_value=mock_context,
         ):
-            with pytest.raises(Exception):
+            with pytest.raises(RetryError):
                 await delete_secret_with_retry("test-secret-key")
 
         # Should have attempted 5 times
@@ -245,7 +256,9 @@ class TestGetAppOutputs:
     ):
         """Test get_app_outputs returns valid PostgresOutputs."""
         mock_client, mock_context = mock_apolo_client
-        mock_client.apps.get_output.return_value = complete_postgres_outputs.model_dump()
+        mock_client.apps.get_output.return_value = (
+            complete_postgres_outputs.model_dump()
+        )
 
         with patch(
             "apolo_apps_postgresql.scripts.cleanup_secrets.apolo_sdk.get",
@@ -310,7 +323,8 @@ class TestMain:
         monkeypatch.setenv("APP_ID", "test-app-123")
 
         async def raise_exception():
-            raise ValueError("Test error")
+            msg = "Test error"
+            raise ValueError(msg)
 
         with patch(
             "apolo_apps_postgresql.scripts.cleanup_secrets.cleanup_secrets",
