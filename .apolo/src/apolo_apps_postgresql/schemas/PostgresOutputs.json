@@ -14,6 +14,7 @@
       "type": "object",
       "x-description": "Apolo Secret Configuration.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Secret",
       "x-type": "ApoloSecret"
@@ -25,6 +26,7 @@
           "type": "string",
           "x-description": "Username for the Postgres user.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres User"
         },
@@ -38,6 +40,7 @@
           "type": "string",
           "x-description": "Host of the Postgres instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres Host"
         },
@@ -47,6 +50,7 @@
           "type": "integer",
           "x-description": "Port of the Postgres instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres Port"
         },
@@ -55,6 +59,7 @@
           "type": "string",
           "x-description": "Host of the PGBouncer instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "PGBouncer Host"
         },
@@ -64,6 +69,7 @@
           "type": "integer",
           "x-description": "Port of the PGBouncer instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "PGBouncer Port"
         },
@@ -120,6 +126,7 @@
       "type": "object",
       "x-description": "Configuration for Crunchy Postgres user credentials.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Postgres User Credentials",
       "x-type": "CrunchyPostgresUserCredentials"
@@ -131,6 +138,7 @@
           "type": "string",
           "x-description": "Username for the Postgres user.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres User"
         },
@@ -144,6 +152,7 @@
           "type": "string",
           "x-description": "Host of the Postgres instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres Host"
         },
@@ -153,6 +162,7 @@
           "type": "integer",
           "x-description": "Port of the Postgres instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres Port"
         },
@@ -161,6 +171,7 @@
           "type": "string",
           "x-description": "Host of the PGBouncer instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "PGBouncer Host"
         },
@@ -170,6 +181,7 @@
           "type": "integer",
           "x-description": "Port of the PGBouncer instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "PGBouncer Port"
         },
@@ -192,6 +204,7 @@
       "type": "object",
       "x-description": "Configuration for the Postgres admin user.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Postgres Admin User",
       "x-type": "PostgresAdminUser"
@@ -210,6 +223,7 @@
           "default": null,
           "x-description": "Admin user for the Postgres instance.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres Admin User"
         },
@@ -221,6 +235,7 @@
           "type": "array",
           "x-description": "List of Postgres users with their credentials.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres Users"
         }
@@ -229,6 +244,7 @@
       "type": "object",
       "x-description": "",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
       "x-type": "PostgresUsers"
@@ -247,6 +263,7 @@
           "default": null,
           "x-description": "Internal URL to access the service. This route is not protected by platform authorization and only workloads from the same project can access it.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Internal URL"
         },
@@ -262,6 +279,7 @@
           "default": null,
           "x-description": "External URL for accessing the service from outside the cluster. This route might be secured by platform authorization and is accessible from any network with a valid platform authorization token that has appropriate permissions.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "External URL"
         }
@@ -270,6 +288,7 @@
       "type": "object",
       "x-description": "Service APIs URLs.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Service APIs",
       "x-type": "ServiceAPI[GrpcAPI]"
@@ -281,6 +300,7 @@
           "type": "string",
           "x-description": "The hostname of the HTTP endpoint.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Hostname"
         },
@@ -291,6 +311,7 @@
           "type": "integer",
           "x-description": "The port of the HTTP endpoint.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Port"
         },
@@ -300,6 +321,7 @@
           "type": "string",
           "x-description": "The protocol to use, e.g., http or https.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Protocol"
         },
@@ -316,6 +338,7 @@
           "title": "Timeout",
           "x-description": "Connection timeout in seconds.",
           "x-is-advanced-field": false,
+          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Connection Timeout"
         },
@@ -338,6 +361,7 @@
       "type": "object",
       "x-description": "HTTP API Configuration.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "HTTP API",
       "x-type": "OpenAICompatibleEmbeddingsRestAPI"
