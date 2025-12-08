@@ -160,8 +160,8 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
             return {}
 
         name = f"app-pg-backup-{app_name}"
-
-        logger.info(f"Getting bucket credentials with name: {name}")
+        msg = "Getting bucket credentials with name: " + name
+        logger.info(msg)
         bucket_credentials = await get_or_create_bucket_credentials(
             client=self.client,
             bucket_name=name,

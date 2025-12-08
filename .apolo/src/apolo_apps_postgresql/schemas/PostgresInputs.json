@@ -14,7 +14,6 @@
       "type": "object",
       "x-description": "Apolo Secret Configuration.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Secret",
       "x-type": "ApoloSecret"
@@ -72,7 +71,6 @@
       "type": "object",
       "x-description": "Configuration for Bucket.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "dynamic",
       "x-title": "Bucket",
       "x-type": "Bucket"
@@ -123,7 +121,6 @@
       "type": "object",
       "x-description": "",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
       "x-type": "PostgresUsers"
@@ -173,7 +170,6 @@
       "type": "object",
       "x-description": "",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
       "x-type": "PostgresUsers"
@@ -205,7 +201,6 @@
       "type": "object",
       "x-description": "Enable backup for your Postgres cluster.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Enable Backups",
       "x-type": "PGBackupConfig"
@@ -231,7 +226,6 @@
       "type": "object",
       "x-description": "Configuration for PG Bouncer.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "PG Bouncer",
       "x-type": "PGBouncer"
@@ -243,7 +237,6 @@
           "default": "16",
           "x-description": "Set version of the Postgres server to use.",
           "x-is-advanced-field": false,
-          "x-is-configurable": false,
           "x-meta-type": "inline",
           "x-title": "Postgres version"
         },
@@ -254,7 +247,6 @@
           "type": "integer",
           "x-description": "Set number of replicas for the Postgres instance.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres instance replicas"
         },
@@ -265,7 +257,6 @@
           "type": "integer",
           "x-description": "Set size of the Postgres instance disk (in GB).",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Postgres instance disk size"
         },
@@ -278,7 +269,6 @@
           "type": "array",
           "x-description": "Configure list of users and databases they have access to. Multiple users could have access to the same database.Postgres user 'postgres' is always created and has access to all databases.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Database users"
         }
@@ -290,7 +280,6 @@
       "type": "object",
       "x-description": "Configuration for Postgres.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Postgres",
       "x-type": "PostgresConfig"
@@ -305,7 +294,6 @@
           "type": "string",
           "x-description": "Name of the database user. Must be 1-63 characters long, start and end with a lowercase letter or number, and contain only lowercase letters, numbers, or hyphens.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Database user name"
         },
@@ -320,7 +308,6 @@
           "type": "array",
           "x-description": "List of databases this user should have access to. Databases will be created if they do not exist.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Databases"
         }
@@ -332,7 +319,6 @@
       "type": "object",
       "x-description": "",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
       "x-type": "PostgresUsers"
@@ -355,7 +341,6 @@
           "type": "string",
           "x-description": "The name of the preset.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Resource Preset"
         }
@@ -367,7 +352,6 @@
       "type": "object",
       "x-description": "Select the resource preset used per service replica.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Resource Preset",
       "x-type": "Preset"
@@ -417,7 +401,6 @@
       "type": "object",
       "x-description": "",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
       "x-type": "PostgresUsers"
