@@ -159,7 +159,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         if not input_.backup or not input_.backup.enable:
             return {}
 
-        name = f"app-pg-backup-{app_name}"
+        name = f"{app_name}-bkp"[:40]
         msg = "Getting bucket credentials with name: " + name
         logger.info(msg)
         bucket_credentials = await get_or_create_bucket_credentials(
