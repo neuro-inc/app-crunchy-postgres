@@ -155,11 +155,13 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
     async def _get_backup_config(
         self, input_: PostgresInputs, app_name: str
     ) -> dict[str, t.Any]:
+        logger.info("Getting backup config")
         if not input_.backup or not input_.backup.enable:
             return {}
 
-        name = f"app-pg-backup-{app_name}"
-
+        name = f"{app_name}-bkp"[:40]
+        msg = "Getting bucket credentials with name: " + name
+        logger.info(msg)
         bucket_credentials = await get_or_create_bucket_credentials(
             client=self.client,
             bucket_name=name,
@@ -170,6 +172,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                 apolo_sdk.Bucket.Provider.GCP,
             ],
         )
+        logger.info("Got bucket credentials")
 
         provider = bucket_credentials.credentials[0].provider
         credentials = bucket_credentials.credentials[0].credentials
