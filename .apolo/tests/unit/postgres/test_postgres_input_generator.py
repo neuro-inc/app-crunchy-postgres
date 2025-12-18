@@ -5,20 +5,20 @@ import apolo_sdk
 import pydantic
 import pytest
 from apolo_apps_postgresql.inputs_processor import PostgresInputsChartValueProcessor
+from apolo_apps_postgresql.types import (
+    PGBackupConfig,
+    PGBouncer,
+    PostgresConfig,
+    PostgresDBUser,
+    PostgresInputs,
+    PostgresSupportedVersions,
+)
 
-from apolo_app_types import PostgresInputs
 from apolo_app_types.protocols.common import Preset
 from apolo_app_types.protocols.common.buckets import (
     Bucket,
     BucketProvider,
     GCPBucketCredentials,
-)
-from apolo_app_types.protocols.postgres import (
-    PGBackupConfig,
-    PGBouncer,
-    PostgresConfig,
-    PostgresDBUser,
-    PostgresSupportedVersions,
 )
 
 
@@ -48,39 +48,261 @@ async def test_values_postgresql_generation(setup_clients, mock_get_preset_cpu):
                     name="cpu-large",
                 ),
             ),
-            backup=PGBackupConfig(),
+            backup=PGBackupConfig(
+                backup_preset=Preset(
+                    name="cpu-small",
+                ),
+            ),
         ),
         app_name="psdb",
         namespace=DEFAULT_NAMESPACE,
         app_id=APP_ID,
         app_secrets_name=APP_SECRETS_NAME,
     )
-    assert helm_params["features"] == {"AutoCreateUserSchema": "true"}
-    assert len(helm_params["instances"]) == 1
-    assert helm_params["instances"][0]["name"] == "instance1"
-    assert helm_params["instances"][0]["replicas"] == 3
-    assert helm_params["instances"][0]["dataVolumeClaimSpec"] == {
-        "accessModes": ["ReadWriteOnce"],
-        "resources": {"requests": {"storage": "1Gi"}},
-    }
-    assert helm_params["instances"][0]["metadata"]["labels"] == {
-        "platform.apolo.us/app": "crunchypostgresql",
-        "platform.apolo.us/component": "app",
-        "platform.apolo.us/preset": "cpu-large",
-    }
-    assert "nodeAffinity" in helm_params["instances"][0]["affinity"]
-    assert "podAntiAffinity" in helm_params["instances"][0]["affinity"]
-    assert helm_params["users"] == [
-        {"name": "postgres"},
-        {
-            "name": "somename",
-            "password": {"type": "AlphaNumeric"},
-            "databases": ["somedb"],
+    assert helm_params == {
+        "metadata": {"labels": {"platform.apolo.us/component": "app"}},
+        "features": {"AutoCreateUserSchema": "true"},
+        "name": f"pg-{APP_ID}",
+        "postgresVersion": "16",
+        "databaseInitSQL": {
+            "name": f"pg-{APP_ID}-init-sql",
+            "key": "bootstrap.sql",
         },
-    ]
-    assert helm_params["gcs"] == {
-        "bucket": "test-bucket",
-        "key": "bucket-access-key",
+        "apolo_app_id": APP_ID,
+        "instances": [
+            {
+                "name": "instance1",
+                "metadata": {
+                    "labels": {
+                        "platform.apolo.us/component": "app",
+                        "platform.apolo.us/app": "crunchypostgresql",
+                        "platform.apolo.us/preset": "cpu-large",
+                    }
+                },
+                "replicas": 3,
+                "dataVolumeClaimSpec": {
+                    "accessModes": ["ReadWriteOnce"],
+                    "resources": {"requests": {"storage": "1Gi"}},
+                },
+                "resources": {
+                    "requests": {"cpu": "4000.0m", "memory": "0M"},
+                    "limits": {"cpu": "4000.0m", "memory": "0M"},
+                },
+                "tolerations": [
+                    {
+                        "effect": "NoSchedule",
+                        "key": "platform.neuromation.io/job",
+                        "operator": "Exists",
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300,
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300,
+                    },
+                ],
+                "affinity": {
+                    "nodeAffinity": {
+                        "requiredDuringSchedulingIgnoredDuringExecution": {
+                            "nodeSelectorTerms": [
+                                {
+                                    "matchExpressions": [
+                                        {
+                                            "key": "platform.neuromation.io/nodepool",
+                                            "operator": "In",
+                                            "values": ["cpu_pool"],
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "weight": 100,
+                                "podAffinityTerm": {
+                                    "topologyKey": "kubernetes.io/hostname",
+                                    "labelSelector": {
+                                        "matchExpressions": [
+                                            {
+                                                "key": "platform.apolo.us/component",
+                                                "operator": "In",
+                                                "values": ["app"],
+                                            },
+                                            {
+                                                "key": "platform.apolo.us/app",
+                                                "operator": "In",
+                                                "values": ["crunchypostgresql"],
+                                            },
+                                        ]
+                                    },
+                                },
+                            }
+                        ]
+                    },
+                },
+            }
+        ],
+        "pgBouncerConfig": {
+            "affinity": {
+                "nodeAffinity": {
+                    "requiredDuringSchedulingIgnoredDuringExecution": {
+                        "nodeSelectorTerms": [
+                            {
+                                "matchExpressions": [
+                                    {
+                                        "key": "platform.neuromation.io/nodepool",
+                                        "operator": "In",
+                                        "values": ["cpu_pool"],
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "podAntiAffinity": {
+                    "preferredDuringSchedulingIgnoredDuringExecution": [
+                        {
+                            "weight": 100,
+                            "podAffinityTerm": {
+                                "topologyKey": "kubernetes.io/hostname",
+                                "labelSelector": {
+                                    "matchExpressions": [
+                                        {
+                                            "key": "platform.apolo.us/component",
+                                            "operator": "In",
+                                            "values": ["app"],
+                                        },
+                                        {
+                                            "key": "platform.apolo.us/app",
+                                            "operator": "In",
+                                            "values": ["crunchypostgresql"],
+                                        },
+                                    ]
+                                },
+                            },
+                        }
+                    ]
+                },
+            },
+            "metadata": {
+                "labels": {
+                    "platform.apolo.us/component": "app",
+                    "platform.apolo.us/app": "crunchypostgresql",
+                    "platform.apolo.us/preset": "cpu-large",
+                }
+            },
+            "replicas": 2,
+            "resources": {
+                "requests": {"cpu": "4000.0m", "memory": "0M"},
+                "limits": {"cpu": "4000.0m", "memory": "0M"},
+            },
+            "tolerations": [
+                {
+                    "effect": "NoSchedule",
+                    "key": "platform.neuromation.io/job",
+                    "operator": "Exists",
+                },
+                {
+                    "effect": "NoExecute",
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "tolerationSeconds": 300,
+                },
+                {
+                    "effect": "NoExecute",
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "tolerationSeconds": 300,
+                },
+            ],
+        },
+        "gcs": {"bucket": "test-bucket", "key": "bucket-access-key"},
+        "pgBackRestConfig": {
+            "configuration": [
+                {
+                    "secret": {
+                        "name": f"pg-{APP_ID}-pgbackrest-secret",
+                    },
+                }
+            ],
+            "global": {
+                "repo1-path": f"/pgbackrest/default/pg-{APP_ID}/repo1",
+            },
+            "repos": [
+                {
+                    "name": "repo1",
+                    "gcs": {
+                        "bucket": "test-bucket",
+                    },
+                }
+            ],
+            "metadata": {
+                "labels": {
+                    "platform.apolo.us/component": "app",
+                    "platform.apolo.us/app": "crunchypostgresql",
+                    "platform.apolo.us/preset": "cpu-small",
+                },
+            },
+            "jobs": {
+                "resources": {
+                    "requests": {"cpu": "2000.0m", "memory": "0M"},
+                    "limits": {"cpu": "2000.0m", "memory": "0M"},
+                },
+                "affinity": {
+                    "nodeAffinity": {
+                        "requiredDuringSchedulingIgnoredDuringExecution": {
+                            "nodeSelectorTerms": [
+                                {
+                                    "matchExpressions": [
+                                        {
+                                            "key": "platform.neuromation.io/nodepool",
+                                            "operator": "In",
+                                            "values": ["cpu_pool"],
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "tolerations": [
+                    {
+                        "effect": "NoSchedule",
+                        "key": "platform.neuromation.io/job",
+                        "operator": "Exists",
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "tolerationSeconds": 300,
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300,
+                    },
+                ],
+            },
+        },
+        "users": [
+            {"name": "postgres"},
+            {
+                "name": "somename",
+                "password": {"type": "AlphaNumeric"},
+                "databases": ["somedb"],
+            },
+        ],
+        "apolo-hooks": {"image": {"tag": "latest"}},
     }
 
 
@@ -107,7 +329,11 @@ async def test_values_postgresql_generation_invalid_name(
                         name="cpu-large",
                     ),
                 ),
-                backup=PGBackupConfig(),
+                backup=PGBackupConfig(
+                    backup_preset=Preset(
+                        name="cpu-small",
+                    ),
+                ),
             ),
             app_name="psdb",
             namespace=DEFAULT_NAMESPACE,
@@ -290,7 +516,11 @@ async def test_values_postgresql_generation_with_minio(
                 db_users=[PostgresDBUser(name="user1", db_names=["db1"])],
             ),
             pg_bouncer=PGBouncer(preset=Preset(name="cpu-large")),
-            backup=PGBackupConfig(),
+            backup=PGBackupConfig(
+                backup_preset=Preset(
+                    name="cpu-small",
+                ),
+            ),
         ),
         app_name="psdb",
         namespace=DEFAULT_NAMESPACE,

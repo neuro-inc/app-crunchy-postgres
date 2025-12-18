@@ -180,13 +180,6 @@
     },
     "PGBackupConfig": {
       "properties": {
-        "enable": {
-          "const": true,
-          "default": true,
-          "description": "Enable backups for the Postgres cluster. We automatically create and configure the corresponding backup bucket for you. Note: this bucket will not be automatically removed when you remove the app.",
-          "title": "Enable backups",
-          "type": "boolean"
-        },
         "backup_bucket": {
           "anyOf": [
             {
@@ -199,8 +192,16 @@
           "default": null,
           "description": "Optionally provide your own bucket for backups. If not provided, a default bucket will be created.",
           "title": "Custom backup bucket"
+        },
+        "backup_preset": {
+          "$ref": "#/$defs/Preset",
+          "x-description": "Select the resource preset used for running the backup job.",
+          "x-title": "Backup job preset"
         }
       },
+      "required": [
+        "backup_preset"
+      ],
       "title": "PGBackupConfig",
       "type": "object",
       "x-description": "Enable backup for your Postgres cluster.",
