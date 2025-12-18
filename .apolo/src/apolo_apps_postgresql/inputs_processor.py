@@ -153,7 +153,11 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         }
 
     async def _get_backup_config(
-        self, input_: PostgresInputs, app_name: str, namespace: str
+        self,
+        input_: PostgresInputs,
+        app_name: str,
+        namespace: str,
+        postgrescluster_crd_name: str,
     ) -> dict[str, t.Any]:
         logger.info("Getting backup config")
         if not input_.backup:
@@ -195,12 +199,12 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                 "configuration": [
                     {
                         "secret": {
-                            "name": f"{app_name}-pgbackrest-secret",
+                            "name": f"{postgrescluster_crd_name}-pgbackrest-secret",
                         },
                     }
                 ],
                 "global": {
-                    "repo1-path": f"/pgbackrest/{namespace}/{app_name}/repo1",
+                    "repo1-path": f"/pgbackrest/{namespace}/{postgrescluster_crd_name}/repo1",  # noqa: E501
                 },
                 "repos": [
                     {
@@ -310,7 +314,9 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         if users_config:
             values["users"] = users_config
 
-        backup_values = await self._get_backup_config(input_, app_name, namespace)
+        backup_values = await self._get_backup_config(
+            input_, app_name, namespace, postgrescluster_crd_name
+        )
 
         # Add image configuration for cleanup job
         image_values = {

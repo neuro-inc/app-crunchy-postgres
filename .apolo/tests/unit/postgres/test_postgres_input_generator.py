@@ -229,12 +229,12 @@ async def test_values_postgresql_generation(setup_clients, mock_get_preset_cpu):
             "configuration": [
                 {
                     "secret": {
-                        "name": "psdb-pgbackrest-secret",
+                        "name": f"pg-{APP_ID}-pgbackrest-secret",
                     },
                 }
             ],
             "global": {
-                "repo1-path": "/pgbackrest/default/psdb/repo1",
+                "repo1-path": f"/pgbackrest/default/pg-{APP_ID}/repo1",
             },
             "repos": [
                 {
