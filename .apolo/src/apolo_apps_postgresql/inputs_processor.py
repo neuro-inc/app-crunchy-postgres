@@ -14,7 +14,7 @@ from apolo_app_types.helm.apps.common import (
 )
 from apolo_app_types.helm.utils.buckets import get_or_create_bucket_credentials
 from apolo_app_types.helm.utils.deep_merging import merge_list_of_dicts
-from apolo_app_types.protocols.postgres import PostgresDBUser, PostgresInputs
+from apolo_apps_postgresql.types import PostgresDBUser, PostgresInputs
 
 
 logger = logging.getLogger(__name__)
@@ -153,19 +153,27 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         }
 
     async def _get_backup_config(
-        self, input_: PostgresInputs, app_name: str
+        self, input_: PostgresInputs, app_name: str, namespace: str
     ) -> dict[str, t.Any]:
         logger.info("Getting backup config")
-        if not input_.backup or not input_.backup.enable:
+        if not input_.backup:
             return {}
 
-        name = f"{app_name}-bkp"[:40]
-        msg = "Getting bucket credentials with name: " + name
+        credentials_name = f"{app_name}-bkp"[:40]
+        if not input_.backup.backup_bucket:
+            bucket_name = credentials_name
+            msg = (
+                "No bucket for backup provided, creating one with name: " + bucket_name
+            )
+        else:
+            bucket_name = input_.backup.backup_bucket.id
+            msg = "Getting bucket credentials with id: " + bucket_name
         logger.info(msg)
+
         bucket_credentials = await get_or_create_bucket_credentials(
             client=self.client,
-            bucket_name=name,
-            credentials_name=name,
+            bucket_name=bucket_name,
+            credentials_name=credentials_name,
             supported_providers=[
                 apolo_sdk.Bucket.Provider.AWS,
                 apolo_sdk.Bucket.Provider.MINIO,
@@ -177,8 +185,44 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         provider = bucket_credentials.credentials[0].provider
         credentials = bucket_credentials.credentials[0].credentials
 
-        values = {}
+        preset = get_preset(self.client, input_.backup.backup_preset.name)
+        resources = preset_to_resources(preset)
+        tolerations = await preset_to_tolerations(preset)
+        affinity = preset_to_affinity(preset)
+
+        values = {
+            "pgBackRestConfig": {
+                "configuration": [
+                    {
+                        "secret": {
+                            "name": f"{app_name}-pgbackrest-secret",
+                        },
+                    }
+                ],
+                "global": {
+                    "repo1-path": f"/pgbackrest/{namespace}/{app_name}/repo1",
+                },
+                "repos": [
+                    {
+                        "name": "repo1",
+                    }
+                ],
+                "metadata": {
+                    "labels": {
+                        "platform.apolo.us/component": "app",
+                        "platform.apolo.us/app": "crunchypostgresql",
+                        "platform.apolo.us/preset": input_.backup.backup_preset.name,
+                    },
+                },
+                "jobs": {
+                    "resources": resources,
+                    "affinity": affinity,
+                    "tolerations": tolerations,
+                },
+            }
+        }
         if provider in (apolo_sdk.Bucket.Provider.AWS, apolo_sdk.Bucket.Provider.MINIO):
+            # to create a secret
             values["s3"] = {
                 "bucket": credentials["bucket_name"],
                 "endpoint": credentials["endpoint_url"],
@@ -186,10 +230,20 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                 "key": credentials["access_key_id"],
                 "keySecret": credentials["secret_access_key"],
             }
+            values["pgBackRestConfig"]["global"]["repo1-s3-uri-style"] = "path"  # type: ignore
+            values["pgBackRestConfig"]["repos"][0]["s3"] = {  # type: ignore
+                "bucket": credentials["bucket_name"],
+                "endpoint": credentials["endpoint_url"],
+                "region": credentials["region_name"],
+            }
         elif provider == apolo_sdk.Bucket.Provider.GCP:
+            # to create a secret
             values["gcs"] = {
                 "bucket": credentials["bucket_name"],
                 "key": base64.b64decode(credentials["key_data"]).decode("utf-8"),
+            }
+            values["pgBackRestConfig"]["repos"][0]["gcs"] = {  # type: ignore
+                "bucket": credentials["bucket_name"],
             }
         # For Azure, we need to return a bit more data from API
         else:
@@ -256,7 +310,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         if users_config:
             values["users"] = users_config
 
-        backup_values = await self._get_backup_config(input_, app_name)
+        backup_values = await self._get_backup_config(input_, app_name, namespace)
 
         # Add image configuration for cleanup job
         image_values = {
