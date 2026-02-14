@@ -237,6 +237,50 @@
       "x-title": "PG Bouncer",
       "x-type": "PGBouncer"
     },
+    "PGDataSourceConfig": {
+      "properties": {
+        "source_bucket": {
+          "$ref": "#/$defs/Bucket",
+          "description": "Provide a bucket of PostgreSQL instance to restore from. Use source PostgreSQL app instance backup bucket for cloning.",
+          "title": "Set source bucket"
+        },
+        "repo1_path": {
+          "description": "Provide path in source bucket where backups are stored by pgBackRest. Typically follows the pattern: /pgbackrest/{namespace}/pg-{id}/repo1",
+          "title": "Specify source backup path",
+          "type": "string"
+        },
+        "restore_preset": {
+          "$ref": "#/$defs/Preset",
+          "description": "Select the resource preset used for running the restore job.",
+          "title": "Restore job preset"
+        },
+        "pgbackrest_options": {
+          "default": [
+            "--type=default"
+          ],
+          "description": "Control how pgBackRest rolles out your database copy. See Apolo Documentation page dedicated to for Disaster recovery & Clonning for PostgreSQL application. If not changed, we perform 'Clone to latest'.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Options for pgBackRest",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_bucket",
+        "repo1_path",
+        "restore_preset"
+      ],
+      "title": "PGDataSourceConfig",
+      "type": "object",
+      "x-description": "Use other PostgreSQL instance backups to clone the database.",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "inline",
+      "x-title": "Configure data source for clone",
+      "x-type": "PGDataSourceConfig"
+    },
     "PostgresConfig": {
       "properties": {
         "postgres_version": {
@@ -432,7 +476,15 @@
       "$ref": "#/$defs/PostgresConfig"
     },
     "pg_bouncer": {
-      "$ref": "#/$defs/PGBouncer"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PGBouncer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "backup": {
       "anyOf": [
@@ -444,12 +496,22 @@
         }
       ],
       "default": null
+    },
+    "source": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PGDataSourceConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "required": [
     "preset",
-    "postgres_config",
-    "pg_bouncer"
+    "postgres_config"
   ],
   "title": "PostgresInputs",
   "type": "object"

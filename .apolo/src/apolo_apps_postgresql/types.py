@@ -178,11 +178,54 @@ class PGBackupConfig(AbstractAppFieldType):
     )
 
 
+class PGDataSourceConfig(AbstractAppFieldType):
+    model_config = ConfigDict(
+        protected_namespaces=(),
+        json_schema_extra=SchemaExtraMetadata(
+            title="Configure data source for clone",
+            description="Use other PostgreSQL instance backups to clone the database.",
+        ).as_json_schema_extra(),
+    )
+    source_bucket: Bucket = Field(
+        ...,
+        title="Set source bucket",
+        description=(
+            "Provide a bucket of PostgreSQL instance to restore from. "
+            "Use source PostgreSQL app instance backup bucket for cloning."
+        ),
+    )
+    repo1_path: str = Field(
+        ...,
+        title="Specify source backup path",
+        description=(
+            "Provide path in source bucket where backups are stored by pgBackRest. "
+            "Typically follows the pattern: /pgbackrest/{namespace}/pg-{id}/repo1"
+        ),
+    )
+    restore_preset: Preset = Field(
+        ...,
+        title="Restore job preset",
+        description="Select the resource preset used for running the restore job.",
+    )
+    pgbackrest_options: list[str] = Field(
+        default=["--type=default"],
+        min_length=1,
+        title="Options for pgBackRest",
+        description=(
+            "Control how pgBackRest rolles out your database copy. "
+            "See Apolo Documentation page dedicated to for Disaster recovery & Clonning"
+            " for PostgreSQL application. "
+            "If not changed, we perform 'Clone to latest'."
+        ),
+    )
+
+
 class PostgresInputs(AppInputs):
     preset: Preset
     postgres_config: PostgresConfig
-    pg_bouncer: PGBouncer
+    pg_bouncer: PGBouncer | None = None
     backup: PGBackupConfig | None = None
+    source: PGDataSourceConfig | None = None
 
 
 class PostgresAdminUser(BasePostgresUserCredentials):
