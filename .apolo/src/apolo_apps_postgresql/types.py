@@ -153,6 +153,50 @@ class PGBouncer(AbstractAppFieldType):
     )
 
 
+class PGBackupSchedule(AbstractAppFieldType):
+    full_backup_cron: str = Field(
+        default="0 2 * * 0",
+        description=(
+            "Cron expression for scheduling full backups. "
+            "Supports standard cron syntax. "
+            "Example: '0 2 * * *' for daily backups at 2 AM. "
+            "Default - weekly on Sundays at 2 AM."
+        ),
+        title="Full backup schedule",
+    )
+    full_backup_retention_count: int = Field(
+        default=4,
+        gt=0,
+        title="Full backup retention count",
+        description=(
+            "Number of full backups to retain. "
+            "Older backups beyond this count will be automatically deleted. "
+            "Default is 4, "
+            "which means approximately one month of weekly backups will be retained."
+        ),
+    )
+    differential_backup_cron: str | None = Field(
+        default=None,
+        description=(
+            "Cron expression for scheduling differential backups. "
+            "If not provided, only full backups will be scheduled. "
+            "Example: '0 2 * * 1-6' for daily backups at 2 AM from Monday to Saturday. "
+            "Default - not scheduled."
+        ),
+        title="Differential backup schedule",
+    )
+    differential_backup_retention_count: int = Field(
+        default=7,
+        gt=0,
+        title="Differential backup retention count",
+        description=(
+            "Number of differential backups to retain. "
+            "Older backups beyond this count will be automatically deleted. "
+            "Default is 7, which is enough to keep diffs between full backups."
+        ),
+    )
+
+
 class PGBackupConfig(AbstractAppFieldType):
     model_config = ConfigDict(
         protected_namespaces=(),
@@ -174,6 +218,15 @@ class PGBackupConfig(AbstractAppFieldType):
         json_schema_extra=SchemaExtraMetadata(
             title="Backup job preset",
             description="Select the resource preset used for running the backup job.",
+        ).as_json_schema_extra(),
+    )
+    schedule: PGBackupSchedule = Field(
+        ...,
+        json_schema_extra=SchemaExtraMetadata(
+            title="Backup schedule",
+            description=(
+                "Configure schedule for full, differential, and incremental backups."
+            ),
         ).as_json_schema_extra(),
     )
 

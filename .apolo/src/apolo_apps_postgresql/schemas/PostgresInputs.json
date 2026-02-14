@@ -197,10 +197,16 @@
           "$ref": "#/$defs/Preset",
           "x-description": "Select the resource preset used for running the backup job.",
           "x-title": "Backup job preset"
+        },
+        "schedule": {
+          "$ref": "#/$defs/PGBackupSchedule",
+          "x-description": "Configure schedule for full, differential, and incremental backups.",
+          "x-title": "Backup schedule"
         }
       },
       "required": [
-        "backup_preset"
+        "backup_preset",
+        "schedule"
       ],
       "title": "PGBackupConfig",
       "type": "object",
@@ -210,6 +216,51 @@
       "x-meta-type": "inline",
       "x-title": "Enable Backups",
       "x-type": "PGBackupConfig"
+    },
+    "PGBackupSchedule": {
+      "properties": {
+        "full_backup_cron": {
+          "default": "0 2 * * 0",
+          "description": "Cron expression for scheduling full backups. Supports standard cron syntax. Example: '0 2 * * *' for daily backups at 2 AM. Default - weekly on Sundays at 2 AM.",
+          "title": "Full backup schedule",
+          "type": "string"
+        },
+        "full_backup_retention_count": {
+          "default": 4,
+          "description": "Number of full backups to retain. Older backups beyond this count will be automatically deleted. Default is 4, which means approximately one month of weekly backups will be retained.",
+          "exclusiveMinimum": 0,
+          "title": "Full backup retention count",
+          "type": "integer"
+        },
+        "differential_backup_cron": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cron expression for scheduling differential backups. If not provided, only full backups will be scheduled. Example: '0 2 * * 1-6' for daily backups at 2 AM from Monday to Saturday. Default - not scheduled.",
+          "title": "Differential backup schedule"
+        },
+        "differential_backup_retention_count": {
+          "default": 7,
+          "description": "Number of differential backups to retain. Older backups beyond this count will be automatically deleted. Default is 7, which is enough to keep diffs between full backups.",
+          "exclusiveMinimum": 0,
+          "title": "Differential backup retention count",
+          "type": "integer"
+        }
+      },
+      "title": "PGBackupSchedule",
+      "type": "object",
+      "x-description": "",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "inline",
+      "x-title": "",
+      "x-type": "PostgresUsers"
     },
     "PGBouncer": {
       "properties": {

@@ -248,8 +248,24 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
 
         global_config: dict[str, t.Any] = {
             "repo1-path": f"/pgbackrest/{namespace}/{postgrescluster_crd_name}/repo1",
+            "repo1-retention-full": str(
+                input_.backup.schedule.full_backup_retention_count
+            ),
+            "repo1-retention-full-type": "count",
+            **extra_global,
         }
-        global_config.update(extra_global)
+        if input_.backup.schedule.differential_backup_cron:
+            global_config["repo1-retention-diff"] = str(
+                input_.backup.schedule.differential_backup_retention_count
+            )
+
+        backup_schedules = {
+            "full": input_.backup.schedule.full_backup_cron,
+        }
+        if input_.backup.schedule.differential_backup_cron:
+            backup_schedules["differential"] = (
+                input_.backup.schedule.differential_backup_cron
+            )
 
         values: dict[str, t.Any] = {
             "pgBackRestConfig": {
@@ -264,6 +280,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                 "repos": [
                     {
                         "name": "repo1",
+                        "schedules": backup_schedules,
                         **repo_config,
                     }
                 ],
