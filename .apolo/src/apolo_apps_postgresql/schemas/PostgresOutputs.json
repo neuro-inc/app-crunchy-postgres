@@ -55,8 +55,15 @@
           "x-title": "Postgres Port"
         },
         "pgbouncer_host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "title": "Pgbouncer Host",
-          "type": "string",
           "x-description": "Host of the PGBouncer instance.",
           "x-is-advanced-field": false,
           "x-is-configurable": true,
@@ -64,9 +71,16 @@
           "x-title": "PGBouncer Host"
         },
         "pgbouncer_port": {
-          "exclusiveMinimum": 0,
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "title": "Pgbouncer Port",
-          "type": "integer",
           "x-description": "Port of the PGBouncer instance.",
           "x-is-advanced-field": false,
           "x-is-configurable": true,
@@ -167,8 +181,15 @@
           "x-title": "Postgres Port"
         },
         "pgbouncer_host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "title": "Pgbouncer Host",
-          "type": "string",
           "x-description": "Host of the PGBouncer instance.",
           "x-is-advanced-field": false,
           "x-is-configurable": true,
@@ -176,9 +197,16 @@
           "x-title": "PGBouncer Host"
         },
         "pgbouncer_port": {
-          "exclusiveMinimum": 0,
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "title": "Pgbouncer Port",
-          "type": "integer",
           "x-description": "Port of the PGBouncer instance.",
           "x-is-advanced-field": false,
           "x-is-configurable": true,

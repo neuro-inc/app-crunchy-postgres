@@ -152,6 +152,54 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
             "tolerations": tolerations,
         }
 
+    @staticmethod
+    def _build_provider_values(
+        provider: apolo_sdk.Bucket.Provider,
+        credentials: t.Mapping[str, t.Any],
+    ) -> tuple[dict[str, t.Any], dict[str, t.Any], dict[str, t.Any]]:
+        """Build provider-specific values from bucket credentials.
+
+        Returns:
+            Tuple of (secret_values, repo_config, extra_global) where:
+            - secret_values: top-level s3/gcs dict for secret template
+            - repo_config: provider-specific repo section
+            - extra_global: additional pgBackRest global settings
+        """
+        if provider in (apolo_sdk.Bucket.Provider.AWS, apolo_sdk.Bucket.Provider.MINIO):
+            secret_values = {
+                "s3": {
+                    "bucket": credentials["bucket_name"],
+                    "endpoint": credentials["endpoint_url"],
+                    "region": credentials["region_name"],
+                    "key": credentials["access_key_id"],
+                    "keySecret": credentials["secret_access_key"],
+                }
+            }
+            repo_config = {
+                "s3": {
+                    "bucket": credentials["bucket_name"],
+                    "endpoint": credentials["endpoint_url"],
+                    "region": credentials["region_name"],
+                }
+            }
+            extra_global = {"repo1-s3-uri-style": "path"}
+            return secret_values, repo_config, extra_global
+        if provider == apolo_sdk.Bucket.Provider.GCP:
+            secret_values = {
+                "gcs": {
+                    "bucket": credentials["bucket_name"],
+                    "key": base64.b64decode(credentials["key_data"]).decode("utf-8"),
+                }
+            }
+            repo_config = {
+                "gcs": {
+                    "bucket": credentials["bucket_name"],
+                }
+            }
+            return secret_values, repo_config, {}
+        error = "Unsupported bucket provider, unable to configure pgBackRest"
+        raise ValueError(error)
+
     async def _get_backup_config(
         self,
         input_: PostgresInputs,
@@ -189,12 +237,37 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         provider = bucket_credentials.credentials[0].provider
         credentials = bucket_credentials.credentials[0].credentials
 
+        secret_values, repo_config, extra_global = self._build_provider_values(
+            provider, credentials
+        )
+
         preset = get_preset(self.client, input_.backup.backup_preset.name)
         resources = preset_to_resources(preset)
         tolerations = await preset_to_tolerations(preset)
         affinity = preset_to_affinity(preset)
 
-        values = {
+        global_config: dict[str, t.Any] = {
+            "repo1-path": f"/pgbackrest/{namespace}/{postgrescluster_crd_name}/repo1",
+            "repo1-retention-full": str(
+                input_.backup.schedule.full_backup_retention_count
+            ),
+            "repo1-retention-full-type": "count",
+            **extra_global,
+        }
+        if input_.backup.schedule.differential_backup_cron:
+            global_config["repo1-retention-diff"] = str(
+                input_.backup.schedule.differential_backup_retention_count
+            )
+
+        backup_schedules = {
+            "full": input_.backup.schedule.full_backup_cron,
+        }
+        if input_.backup.schedule.differential_backup_cron:
+            backup_schedules["differential"] = (
+                input_.backup.schedule.differential_backup_cron
+            )
+
+        values: dict[str, t.Any] = {
             "pgBackRestConfig": {
                 "configuration": [
                     {
@@ -203,12 +276,12 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                         },
                     }
                 ],
-                "global": {
-                    "repo1-path": f"/pgbackrest/{namespace}/{postgrescluster_crd_name}/repo1",  # noqa: E501
-                },
+                "global": global_config,
                 "repos": [
                     {
                         "name": "repo1",
+                        "schedules": backup_schedules,
+                        **repo_config,
                     }
                 ],
                 "metadata": {
@@ -225,36 +298,71 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                 },
             }
         }
-        if provider in (apolo_sdk.Bucket.Provider.AWS, apolo_sdk.Bucket.Provider.MINIO):
-            # to create a secret
-            values["s3"] = {
-                "bucket": credentials["bucket_name"],
-                "endpoint": credentials["endpoint_url"],
-                "region": credentials["region_name"],
-                "key": credentials["access_key_id"],
-                "keySecret": credentials["secret_access_key"],
-            }
-            values["pgBackRestConfig"]["global"]["repo1-s3-uri-style"] = "path"  # type: ignore
-            values["pgBackRestConfig"]["repos"][0]["s3"] = {  # type: ignore
-                "bucket": credentials["bucket_name"],
-                "endpoint": credentials["endpoint_url"],
-                "region": credentials["region_name"],
-            }
-        elif provider == apolo_sdk.Bucket.Provider.GCP:
-            # to create a secret
-            values["gcs"] = {
-                "bucket": credentials["bucket_name"],
-                "key": base64.b64decode(credentials["key_data"]).decode("utf-8"),
-            }
-            values["pgBackRestConfig"]["repos"][0]["gcs"] = {  # type: ignore
-                "bucket": credentials["bucket_name"],
-            }
-        # For Azure, we need to return a bit more data from API
-        else:
-            # For Azure, we need to return a bit more data from API
-            # OpenStack is not supported in PGO yet
-            error = "Unsupported bucket provider, unable configure backups"
-            raise ValueError(error)
+        values.update(secret_values)
+        return values
+
+    async def _get_data_source_config(
+        self,
+        input_: PostgresInputs,
+        pgcluster_crd_name: str,
+    ) -> dict[str, t.Any]:
+        assert input_.source
+        logger.info("Getting data source config for clone")
+
+        bucket_name = input_.source.source_bucket.id
+        credentials_name = f"{pgcluster_crd_name}-src"[:40]
+
+        logger.info("Getting source bucket credentials with id: %s", bucket_name)
+        bucket_credentials = await get_or_create_bucket_credentials(
+            client=self.client,
+            bucket_name=bucket_name,
+            credentials_name=credentials_name,
+            supported_providers=[
+                apolo_sdk.Bucket.Provider.AWS,
+                apolo_sdk.Bucket.Provider.MINIO,
+                apolo_sdk.Bucket.Provider.GCP,
+            ],
+        )
+        logger.info("Got source bucket credentials")
+
+        provider = bucket_credentials.credentials[0].provider
+        credentials = bucket_credentials.credentials[0].credentials
+
+        secret_values, repo_config, extra_global = self._build_provider_values(
+            provider, credentials
+        )
+        preset = get_preset(self.client, input_.source.restore_preset.name)
+        resources = preset_to_resources(preset)
+        tolerations = await preset_to_tolerations(preset)
+        affinity = preset_to_affinity(preset)
+
+        values: dict[str, t.Any] = {
+            "dataSourceSecret": secret_values,
+            "dataSource": {
+                "pgbackrest": {
+                    "stanza": "db",
+                    "configuration": [
+                        {
+                            "secret": {
+                                "name": f"{pgcluster_crd_name}-src-pgbackrest-secret",
+                            },
+                        }
+                    ],
+                    "global": {
+                        "repo1-path": input_.source.repo1_path,
+                        **extra_global,
+                    },
+                    "repo": {
+                        "name": "repo1",
+                        **repo_config,
+                    },
+                    "options": input_.source.pgbackrest_options or ["--type=default"],
+                    "affinity": affinity,
+                    "tolerations": tolerations,
+                    "resources": resources,
+                },
+            },
+        }
         return values
 
     async def gen_extra_values(
@@ -276,11 +384,10 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
             instances_size=input_.postgres_config.instance_size,
         )
 
-        bouncer_preset_name = input_.pg_bouncer.preset.name
-        pgbouncer_config = {}
-        if bouncer_preset_name:
+        pgbouncer_config = None
+        if input_.pg_bouncer:
             pgbouncer_config = await self._get_bouncer_config(
-                bouncer_preset_name=bouncer_preset_name,
+                bouncer_preset_name=input_.pg_bouncer.preset.name,
                 bouncer_repicas=int(input_.pg_bouncer.replicas),
             )
 
@@ -314,6 +421,12 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         if users_config:
             values["users"] = users_config
 
+        data_source_values: dict[str, t.Any] = {}
+        if input_.source:
+            data_source_values = await self._get_data_source_config(
+                input_, postgrescluster_crd_name
+            )
+
         backup_values = await self._get_backup_config(
             input_, app_name, namespace, postgrescluster_crd_name
         )
@@ -325,4 +438,6 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
             },
         }
 
-        return merge_list_of_dicts([backup_values, values, image_values])
+        return merge_list_of_dicts(
+            [backup_values, data_source_values, values, image_values]
+        )
