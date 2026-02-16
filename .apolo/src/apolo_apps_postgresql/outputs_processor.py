@@ -20,7 +20,7 @@ from .types import PostgresAdminUser, PostgresOutputs, PostgresUsers
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
-MAX_SLEEP_SEC = 10
+MAX_SLEEP_SEC = 60 * 60 * 2
 POSTGRES_ADMIN_USERNAME = "postgres"
 
 
@@ -153,7 +153,7 @@ async def get_postgres_outputs(
     )
     pg_cluster_name = pg_cluster["metadata"]["name"]
 
-    for trial in range(1, MAX_SLEEP_SEC):
+    for _ in range(1, MAX_SLEEP_SEC):
         logger.info("Trying to get postgres outputs")  # noqa: T201
         secrets = await get_secret(
             label=(
@@ -167,9 +167,9 @@ async def get_postgres_outputs(
             )
             logger.info(msg)
             break
-        msg = f"Failed to get postgres outputs, retrying in {trial} seconds"
+        msg = "Failed to get postgres outputs, retrying..."
         logger.info(msg)
-        await asyncio.sleep(trial)
+        await asyncio.sleep(1)
     else:
         msg = "Failed to get postgres outputs"
         raise Exception(msg)
