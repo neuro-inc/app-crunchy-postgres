@@ -83,8 +83,14 @@ async def postgres_creds_from_kube_secret_data(
     password_value = _b64decode(secret_data["password"])
     host = _b64decode(secret_data["host"])
     port = _b64decode(secret_data["port"])
-    pgbouncer_host = _b64decode(secret_data["pgbouncer-host"])
-    pgbouncer_port = _b64decode(secret_data["pgbouncer-port"])
+
+    pgbouncer_host = pgbouncer_port = None
+    try:
+        pgbouncer_host = _b64decode(secret_data["pgbouncer-host"])
+        pgbouncer_port = _b64decode(secret_data["pgbouncer-port"])
+    except KeyError:
+        pass
+
     original_dbname = _b64decode(secret_data.get("dbname"))
 
     # Use override database or the original
@@ -92,7 +98,12 @@ async def postgres_creds_from_kube_secret_data(
     # Include database in secret key if it's an override
     db_suffix = f"-{dbname}" if database_override else ""
 
-    postgres_conn_string = f"postgresql://{user}:{password_value}@{pgbouncer_host}:{pgbouncer_port}/{dbname}"
+    if pgbouncer_host and pgbouncer_port:
+        postgres_conn_string = f"postgresql://{user}:{password_value}@{pgbouncer_host}:{pgbouncer_port}/{dbname}"
+    else:
+        postgres_conn_string = (
+            f"postgresql://{user}:{password_value}@{host}:{port}/{dbname}"
+        )
 
     # Create Apolo secrets for all sensitive fields
     password = await create_apolo_secret_with_retry(
@@ -135,7 +146,7 @@ async def postgres_creds_from_kube_secret_data(
         host=host,
         port=int(port),
         pgbouncer_host=pgbouncer_host,
-        pgbouncer_port=int(pgbouncer_port),
+        pgbouncer_port=int(pgbouncer_port) if pgbouncer_port else None,
         dbname=dbname,
         pgbouncer_uri=pgbouncer_uri,
         postgres_uri=postgres_uri_secret,

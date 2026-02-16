@@ -268,22 +268,22 @@ trio = ["trio (>=0.31.0)"]
 
 [[package]]
 name = "apolo-app-types"
-version = "25.12.1"
+version = "26.2.1"
 description = "Apolo Platform App Types."
 optional = false
-python-versions = "<4.0,>=3.9.0"
+python-versions = "<4.0,>=3.10.0"
 groups = ["main"]
 files = [
-    {file = "apolo_app_types-25.12.1-py3-none-any.whl", hash = "sha256:5a70b5f1372cf098b997e50a262f52ddb3cc0539cdf4b47dc6d12820bf63bb26"},
-    {file = "apolo_app_types-25.12.1.tar.gz", hash = "sha256:f348635496fa26b1cd2035598ad1e213966282d017272d76b5a77056ba2c7831"},
+    {file = "apolo_app_types-26.2.1-py3-none-any.whl", hash = "sha256:19be2645f047bbac943df63616623034f65f15bd8f45d68b7fa9c2f7a627ef41"},
+    {file = "apolo_app_types-26.2.1.tar.gz", hash = "sha256:800a232f81008c0531ad7903130c00add5b95216f2af6dc14832977b4332b544"},
 ]
 
 [package.dependencies]
-apolo-sdk = ">=25.11.1,<26.0.0"
-click = ">=8.0.3,<9.0.0"
+apolo-sdk = ">=26.1.0,<27.0.0"
+click = ">=8.3.1,<9.0.0"
 httpx = ">=0.28.0,<0.29.0"
 jsonref = ">=1.1.0,<2.0.0"
-kubernetes = ">=34.1.0,<35.0.0"
+kubernetes = ">=35.0.0,<36.0.0"
 pydantic = ">=2.12.5,<3.0.0"
 pyyaml = ">=6.0.3,<7.0.0"
 tenacity = ">=9.1.2,<10.0.0"
@@ -292,25 +292,25 @@ yarl = ">=1.22.0,<2.0.0"
 
 [[package]]
 name = "apolo-sdk"
-version = "25.12.0"
+version = "26.1.0"
 description = "Apolo SDK"
 optional = false
 python-versions = ">=3.10.0"
 groups = ["main"]
 files = [
-    {file = "apolo_sdk-25.12.0-py3-none-any.whl", hash = "sha256:f463f2eeb6bcc48903697275c9764a38b994fa7616ae7695a4f064703cde175c"},
-    {file = "apolo_sdk-25.12.0.tar.gz", hash = "sha256:ad3aadd3211e8ef6bf9c86464687c836cc5c92ebdabafca04cfab88218eb96ba"},
+    {file = "apolo_sdk-26.1.0-py3-none-any.whl", hash = "sha256:8165f552d988c9e4a5da4cc503249989694edb7ed1189dd3f430c8239fbfc5b1"},
+    {file = "apolo_sdk-26.1.0.tar.gz", hash = "sha256:21e50a5dccbd86b1ffd2abaabbc9e3dba0c4d51377a5b8befe46230b0c8868d9"},
 ]
 
 [package.dependencies]
-aiobotocore = ">=2.3.0,<3.0"
+aiobotocore = ">=2.3.0,<4.0"
 aiodocker = ">=0.24.0"
 aiohttp = ">=3.11.3"
 azure-storage-blob = ">=12.8.1,<12.9.0 || >12.9.0"
 certifi = "*"
 google-auth = ">=2.0.2"
-neuro-admin-client = "25.11.3"
-neuro-config-client = "25.11.0"
+neuro-admin-client = "25.12.0"
+neuro-config-client = "25.12.0"
 packaging = ">=20.4"
 python-dateutil = ">=2.7.0"
 python-jose = ">=3.3.0"
@@ -761,14 +761,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.3.0"
+version = "8.3.1"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "click-8.3.0-py3-none-any.whl", hash = "sha256:9b9f285302c6e3064f4330c05f05b81945b2a39544279343e6e7c5f27a9baddc"},
-    {file = "click-8.3.0.tar.gz", hash = "sha256:e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4"},
+    {file = "click-8.3.1-py3-none-any.whl", hash = "sha256:981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6"},
+    {file = "click-8.3.1.tar.gz", hash = "sha256:12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"},
 ]
 
 [package.dependencies]
@@ -1316,30 +1316,30 @@ files = [
 
 [[package]]
 name = "kubernetes"
-version = "34.1.0"
+version = "35.0.0"
 description = "Kubernetes python client"
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "kubernetes-34.1.0-py2.py3-none-any.whl", hash = "sha256:bffba2272534e224e6a7a74d582deb0b545b7c9879d2cd9e4aae9481d1f2cc2a"},
-    {file = "kubernetes-34.1.0.tar.gz", hash = "sha256:8fe8edb0b5d290a2f3ac06596b23f87c658977d46b5f8df9d0f4ea83d0003912"},
+    {file = "kubernetes-35.0.0-py2.py3-none-any.whl", hash = "sha256:39e2b33b46e5834ef6c3985ebfe2047ab39135d41de51ce7641a7ca5b372a13d"},
+    {file = "kubernetes-35.0.0.tar.gz", hash = "sha256:3d00d344944239821458b9efd484d6df9f011da367ecb155dadf9513f05f09ee"},
 ]
 
 [package.dependencies]
 certifi = ">=14.05.14"
 durationpy = ">=0.7"
-google-auth = ">=1.0.1"
 python-dateutil = ">=2.5.3"
 pyyaml = ">=5.4.1"
 requests = "*"
 requests-oauthlib = "*"
 six = ">=1.9.0"
-urllib3 = ">=1.24.2,<2.4.0"
+urllib3 = ">=1.24.2,<2.6.0 || >2.6.0"
 websocket-client = ">=0.32.0,<0.40.0 || >0.40.0,<0.41.dev0 || >=0.43.dev0"
 
 [package.extras]
 adal = ["adal (>=1.0.2)"]
+google-auth = ["google-auth (>=1.0.1)"]
 
 [[package]]
 name = "multidict"
@@ -1535,14 +1535,14 @@ files = [
 
 [[package]]
 name = "neuro-admin-client"
-version = "25.11.3"
+version = "25.12.0"
 description = "Internal client for Neu.ro admin service"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "neuro_admin_client-25.11.3-py3-none-any.whl", hash = "sha256:071d1f2d533ee6628d4b7f0fe788e9275a2d9407816fc97a9d66b0107c920e9c"},
-    {file = "neuro_admin_client-25.11.3.tar.gz", hash = "sha256:0b689bbc68be30d7f19b2fdcd2255268507c37870529f6aae558c09b7a49930a"},
+    {file = "neuro_admin_client-25.12.0-py3-none-any.whl", hash = "sha256:9b23dc96a0279a994ec8e30518fd859d504be241aa4209f90c1c498c561186ce"},
+    {file = "neuro_admin_client-25.12.0.tar.gz", hash = "sha256:0142f412d7a5a708ea9861ce81eabe377c50b02b3d694ff0a5bc5f0461cf1a67"},
 ]
 
 [package.dependencies]
@@ -1555,14 +1555,14 @@ yarl = ">=1.22"
 
 [[package]]
 name = "neuro-config-client"
-version = "25.11.0"
+version = "25.12.0"
 description = "Internal client for Neu.ro config service"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "neuro_config_client-25.11.0-py3-none-any.whl", hash = "sha256:524d0a5d4e86149433f21f988fd9ebeede74a4af7a19e87895d7b71a3f089b69"},
-    {file = "neuro_config_client-25.11.0.tar.gz", hash = "sha256:6a8153f2315e09dd1e5e0e8672a20b4b457175525b1c4d194af53862ee74d08f"},
+    {file = "neuro_config_client-25.12.0-py3-none-any.whl", hash = "sha256:35a4cd62f867ecf9c933c5b56ddb1b6a57b5137a1d5dd08a703a711b1ad5f34c"},
+    {file = "neuro_config_client-25.12.0.tar.gz", hash = "sha256:7f0b1adf2d00d53139caf1deea2ddb02e7279244e61fb3f29cf2740647e87863"},
 ]
 
 [package.dependencies]
@@ -2740,4 +2740,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11.0,<4.0"
-content-hash = "28c711fbca4558512dbaf5fbf91f227a552098c5619fdb317596fda2276603c6"
+content-hash = "df374024856650bdcb4db6a7264780400c7347db6205b05147f656d52a317f5e"
