@@ -161,7 +161,7 @@ async def get_postgres_outputs(
                 f"postgres-operator.crunchydata.com/cluster={pg_cluster_name}"
             )
         )
-        if secrets:
+        if secrets and len(secrets.items) > 0:
             msg = (
                 f"Found {len(secrets.items)} user secrets for cluster {pg_cluster_name}"
             )
