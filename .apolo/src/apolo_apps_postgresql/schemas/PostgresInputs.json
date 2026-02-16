@@ -210,7 +210,7 @@
       ],
       "title": "PGBackupConfig",
       "type": "object",
-      "x-description": "Enable backup for your Postgres cluster.",
+      "x-description": "Enable backups of your PostgreSQL cluster.",
       "x-is-advanced-field": false,
       "x-is-configurable": true,
       "x-meta-type": "inline",
@@ -221,13 +221,13 @@
       "properties": {
         "full_backup_cron": {
           "default": "0 2 * * 0",
-          "description": "Cron expression for scheduling full backups. Supports standard cron syntax. Example: '0 2 * * *' for daily backups at 2 AM. Default - weekly on Sundays at 2 AM.",
+          "description": "Cron expression for scheduling full backups. Supports standard cron syntax.\nExample: '0 2 * * *' for daily backups at 2 AM. Default - weekly on Sundays at 2 AM.",
           "title": "Full backup schedule",
           "type": "string"
         },
         "full_backup_retention_count": {
           "default": 4,
-          "description": "Number of full backups to retain. Older backups beyond this count will be automatically deleted. Default is 4, which means approximately one month of weekly backups will be retained.",
+          "description": "Number of full backups to retain. Older backups beyond this count will be automatically deleted.\nDefault is 4, which means approximately one month of weekly backups will be retained.",
           "exclusiveMinimum": 0,
           "title": "Full backup retention count",
           "type": "integer"
@@ -242,12 +242,12 @@
             }
           ],
           "default": null,
-          "description": "Cron expression for scheduling differential backups. If not provided, only full backups will be scheduled. Example: '0 2 * * 1-6' for daily backups at 2 AM from Monday to Saturday. Default - not scheduled.",
+          "description": "Cron expression for scheduling differential backups. If not provided, only full backups will be scheduled.\nExample: '0 2 * * 1-6' for daily backups at 2 AM from Monday to Saturday. Default - not scheduled.",
           "title": "Differential backup schedule"
         },
         "differential_backup_retention_count": {
           "default": 7,
-          "description": "Number of differential backups to retain. Older backups beyond this count will be automatically deleted. Default is 7, which is enough to keep diffs between full backups.",
+          "description": "Number of differential backups to retain. Older backups beyond this count will be automatically deleted.\nDefault is 7, which is enough to keep diffs between full backups.",
           "exclusiveMinimum": 0,
           "title": "Differential backup retention count",
           "type": "integer"
@@ -266,7 +266,8 @@
       "properties": {
         "preset": {
           "$ref": "#/$defs/Preset",
-          "description": "Preset to use for the PGBouncer instance."
+          "x-description": "Preset to use for the PGBouncer instance.",
+          "x-title": "Preset"
         },
         "replicas": {
           "default": 2,
@@ -292,29 +293,30 @@
       "properties": {
         "source_bucket": {
           "$ref": "#/$defs/Bucket",
-          "description": "Provide a bucket of PostgreSQL instance to restore from. Use source PostgreSQL app instance backup bucket for cloning.",
-          "title": "Set source bucket"
+          "x-description": "Provide a bucket of PostgreSQL instance to restore from. Use source PostgreSQL app instance backup bucket for cloning.",
+          "x-meta-type": "inline",
+          "x-title": "Set source bucket"
         },
         "repo1_path": {
-          "description": "Provide path in source bucket where backups are stored by pgBackRest. Typically follows the pattern: /pgbackrest/{namespace}/pg-{id}/repo1",
-          "title": "Specify source backup path",
+          "description": "Specify path in the source bucket where backups are stored by pgBackRest.\nTypically follows the pattern: /pgbackrest/{namespace}/pg-{id}/repo1",
+          "title": "Provide backup path in source bucket",
           "type": "string"
         },
         "restore_preset": {
           "$ref": "#/$defs/Preset",
-          "description": "Select the resource preset used for running the restore job.",
-          "title": "Restore job preset"
+          "x-description": "Select the resource preset used for running the restore job.",
+          "x-title": "Restore job preset"
         },
         "pgbackrest_options": {
           "default": [
             "--type=default"
           ],
-          "description": "Control how pgBackRest rolles out your database copy. See Apolo Documentation page dedicated to for Disaster recovery & Clonning for PostgreSQL application. If not changed, we perform 'Clone to latest'.",
+          "description": "Control how pgBackRest rolles out your database copy.\nSee Apolo Documentation page dedicated to for Disaster recovery & Clonning for PostgreSQL application.\nIf not changed, we perform 'Clone to the latest state'.",
           "items": {
             "type": "string"
           },
           "minItems": 1,
-          "title": "Options for pgBackRest",
+          "title": "Overwrite options for pgBackRest",
           "type": "array"
         }
       },

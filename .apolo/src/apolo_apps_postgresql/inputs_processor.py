@@ -356,7 +356,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                         "name": "repo1",
                         **repo_config,
                     },
-                    "options": input_.source.pgbackrest_options,
+                    "options": input_.source.pgbackrest_options or ["--type=default"],
                     "affinity": affinity,
                     "tolerations": tolerations,
                     "resources": resources,

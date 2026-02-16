@@ -142,8 +142,10 @@ class PGBouncer(AbstractAppFieldType):
     )
     preset: Preset = Field(
         ...,
-        description="Preset to use for the PGBouncer instance.",
-        title="Preset",
+        json_schema_extra=SchemaExtraMetadata(
+            description="Preset to use for the PGBouncer instance.",
+            title="Preset",
+        ).as_json_schema_extra(),
     )
     replicas: int = Field(
         default=2,
@@ -158,7 +160,7 @@ class PGBackupSchedule(AbstractAppFieldType):
         default="0 2 * * 0",
         description=(
             "Cron expression for scheduling full backups. "
-            "Supports standard cron syntax. "
+            "Supports standard cron syntax.\n"
             "Example: '0 2 * * *' for daily backups at 2 AM. "
             "Default - weekly on Sundays at 2 AM."
         ),
@@ -170,7 +172,7 @@ class PGBackupSchedule(AbstractAppFieldType):
         title="Full backup retention count",
         description=(
             "Number of full backups to retain. "
-            "Older backups beyond this count will be automatically deleted. "
+            "Older backups beyond this count will be automatically deleted.\n"
             "Default is 4, "
             "which means approximately one month of weekly backups will be retained."
         ),
@@ -179,7 +181,7 @@ class PGBackupSchedule(AbstractAppFieldType):
         default=None,
         description=(
             "Cron expression for scheduling differential backups. "
-            "If not provided, only full backups will be scheduled. "
+            "If not provided, only full backups will be scheduled.\n"
             "Example: '0 2 * * 1-6' for daily backups at 2 AM from Monday to Saturday. "
             "Default - not scheduled."
         ),
@@ -191,7 +193,7 @@ class PGBackupSchedule(AbstractAppFieldType):
         title="Differential backup retention count",
         description=(
             "Number of differential backups to retain. "
-            "Older backups beyond this count will be automatically deleted. "
+            "Older backups beyond this count will be automatically deleted.\n"
             "Default is 7, which is enough to keep diffs between full backups."
         ),
     )
@@ -202,7 +204,7 @@ class PGBackupConfig(AbstractAppFieldType):
         protected_namespaces=(),
         json_schema_extra=SchemaExtraMetadata(
             title="Enable Backups",
-            description="Enable backup for your Postgres cluster.",
+            description="Enable backups of your PostgreSQL cluster.",
         ).as_json_schema_extra(),
     )
     backup_bucket: Bucket | None = Field(
@@ -241,34 +243,38 @@ class PGDataSourceConfig(AbstractAppFieldType):
     )
     source_bucket: Bucket = Field(
         ...,
-        title="Set source bucket",
-        description=(
-            "Provide a bucket of PostgreSQL instance to restore from. "
-            "Use source PostgreSQL app instance backup bucket for cloning."
-        ),
+        json_schema_extra=SchemaExtraMetadata(
+            title="Set source bucket",
+            description=(
+                "Provide a bucket of PostgreSQL instance to restore from. "
+                "Use source PostgreSQL app instance backup bucket for cloning."
+            ),
+        ).as_json_schema_extra(),
     )
     repo1_path: str = Field(
         ...,
-        title="Specify source backup path",
+        title="Provide backup path in source bucket",
         description=(
-            "Provide path in source bucket where backups are stored by pgBackRest. "
+            "Specify path in the source bucket where backups are stored by pgBackRest.\n"  # noqa: E501
             "Typically follows the pattern: /pgbackrest/{namespace}/pg-{id}/repo1"
         ),
     )
     restore_preset: Preset = Field(
         ...,
-        title="Restore job preset",
-        description="Select the resource preset used for running the restore job.",
+        json_schema_extra=SchemaExtraMetadata(
+            title="Restore job preset",
+            description="Select the resource preset used for running the restore job.",
+        ).as_json_schema_extra(),
     )
     pgbackrest_options: list[str] = Field(
         default=["--type=default"],
         min_length=1,
-        title="Options for pgBackRest",
+        title="Overwrite options for pgBackRest",
         description=(
-            "Control how pgBackRest rolles out your database copy. "
+            "Control how pgBackRest rolles out your database copy.\n"
             "See Apolo Documentation page dedicated to for Disaster recovery & Clonning"
-            " for PostgreSQL application. "
-            "If not changed, we perform 'Clone to latest'."
+            " for PostgreSQL application.\n"
+            "If not changed, we perform 'Clone to the latest state'."
         ),
     )
 
