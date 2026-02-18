@@ -2,8 +2,16 @@ from __future__ import annotations
 
 import enum
 import typing as t
+from datetime import datetime
 
-from pydantic import ConfigDict, Field, StringConstraints, model_validator
+from croniter import croniter
+from pydantic import (
+    ConfigDict,
+    Field,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 from apolo_app_types.protocols.common import (
     AbstractAppFieldType,
@@ -158,6 +166,7 @@ class PGBouncer(AbstractAppFieldType):
 class PGBackupSchedule(AbstractAppFieldType):
     full_backup_cron: str = Field(
         default="0 2 * * 0",
+        min_length=9,
         description=(
             "Cron expression for scheduling full backups. "
             "Supports standard cron syntax.\n"
@@ -197,6 +206,19 @@ class PGBackupSchedule(AbstractAppFieldType):
             "Default is 7, which is enough to keep diffs between full backups."
         ),
     )
+
+    @field_validator("full_backup_cron", "differential_backup_cron")
+    @classmethod
+    def validate_cron(cls, v: str) -> str:
+        if v is None:
+            return v
+        if not croniter.is_valid(v):
+            msg = f"Invalid cron expression: '{v}'"
+            raise ValueError(msg)
+        if not croniter(v, datetime.now()).get_next(datetime):
+            msg = f"Cron expression does not schedule any runs: '{v}'"
+            raise ValueError(msg)
+        return v
 
 
 class PGBackupConfig(AbstractAppFieldType):
