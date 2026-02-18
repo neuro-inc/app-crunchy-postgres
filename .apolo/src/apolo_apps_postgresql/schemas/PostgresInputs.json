@@ -222,6 +222,7 @@
         "full_backup_cron": {
           "default": "0 2 * * 0",
           "description": "Cron expression for scheduling full backups. Supports standard cron syntax.\nExample: '0 2 * * *' for daily backups at 2 AM. Default - weekly on Sundays at 2 AM.",
+          "minLength": 9,
           "title": "Full backup schedule",
           "type": "string"
         },
