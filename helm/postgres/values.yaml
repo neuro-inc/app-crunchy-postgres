@@ -56,6 +56,14 @@ apolo-hooks:
   image:
     repository: ghcr.io/neuro-inc/mlops-app-crunchy-postgres
     tag: latest
+  # Resource limits for apolo hooks container
+  resources:
+  #  limits:
+  #    cpu: 500m
+  #    memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 ###################
 # Image Overrides #
@@ -112,9 +120,45 @@ apolo-hooks:
 # (HA). Settings "instances" overrides this value.
 # instanceReplicas: 1
 
-##############################
-# Advanced Postgres Settings #
-##############################
+#################################
+# Container Resource Limits     #
+#################################
+
+# postgresResourceLimits sets the resource limits for the Postgres instance containers
+# postgresResourceLimits:
+#   limits:
+#     cpu: 2000m
+#     memory: 4Gi
+#   requests:
+#     cpu: 1000m
+#     memory: 2Gi
+
+# pgBackRestResourceLimits sets the resource limits for the pgBackRest container
+# pgBackRestResourceLimits:
+#   limits:
+#     cpu: 1000m
+#     memory: 1Gi
+#   requests:
+#     cpu: 500m
+#     memory: 512Mi
+
+# pgBouncerResourceLimits sets the resource limits for the pgBouncer container
+# pgBouncerResourceLimits:
+#   limits:
+#     cpu: 500m
+#     memory: 512Mi
+#   requests:
+#     cpu: 100m
+#     memory: 256Mi
+
+# exporterResourceLimits sets the resource limits for the metrics exporter container (monitoring)
+# exporterResourceLimits:
+#   limits:
+#     cpu: 500m
+#     memory: 256Mi
+#   requests:
+#     cpu: 100m
+#     memory: 128Mi
 
 # instances allows you to define one or more Postgres instance sets. By default,
 # PGO will only deploy a single instance. Each instance set has similar
@@ -303,7 +347,14 @@ databaseInitSQL:
 # instrumentationImage: ""
 # instrumentationLogs: {}
 # instrumentationMetrics: {}
-# instrumentationResources: {}
+# instrumentationResources sets the resource limits for the instrumentation container (OpenTelemetry)
+# instrumentationResources:
+#   limits:
+#     cpu: 500m
+#     memory: 512Mi
+#   requests:
+#     cpu: 100m
+#     memory: 128Mi
 
 #######################
 # Kubernetes Settings #

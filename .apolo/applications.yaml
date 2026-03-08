@@ -25,6 +25,7 @@
     It comes preconfigured with popular extensions like pgvector for AI and machine learning workloads,
     as well as enhanced observability, tuning options,
     and robust security features—making it ideal for modern, data-intensive applications.
+    Use
   changelog:
     file: ./CHANGELOG.md
   tags: ["Postgres", "PostgreSQL", "RDBMS"]
