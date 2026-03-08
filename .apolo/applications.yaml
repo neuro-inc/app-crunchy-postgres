@@ -25,7 +25,8 @@
     It comes preconfigured with popular extensions like pgvector for AI and machine learning workloads,
     as well as enhanced observability, tuning options,
     and robust security features—making it ideal for modern, data-intensive applications.
-    Use
+    Use the “cpu-mini” configuration (0.5vCPU and 2GB RAM) for Development environments,
+    and “cpu-small” (1vCPU and 4GB RAM or higher) – for Production environments.
   changelog:
     file: ./CHANGELOG.md
   tags: ["Postgres", "PostgreSQL", "RDBMS"]
