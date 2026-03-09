@@ -26,11 +26,8 @@
     as well as enhanced observability, tuning options,
     and robust security features—making it ideal for modern, data-intensive applications.\n
     Resource sizing options:
-    Lean (dev/test): 0.5 vCPU, 2 GiB RAM
-    Balanced (standard prod): 1 vCPU, 4 GiB RAM
-    Resilient (prod with growth/headroom): 2 vCPU, 8 GiB RAM or higher\n
-    These values are for the main Postgres container. Other containers (pgBackRest, pgBouncer, exporter, instrumentation) have much lower requests (0.1–0.5vCPU, 128–512MB RAM each).
-    Use Lean for single instance, low traffic; Balanced for regular prod; Resilient for high concurrency, bursty workloads, or strict stability targets.
+    - Lean (dev/test): 0.5 vCPU, 2 GiB RAM
+    - Balanced (prod): 1 vCPU, 4 GiB RAM
   changelog:
     file: ./CHANGELOG.md
   tags: ["Postgres", "PostgreSQL", "RDBMS"]
