@@ -24,9 +24,14 @@
     replication, and failover to ensure data resilience and minimal downtime.\n
     It comes preconfigured with popular extensions like pgvector for AI and machine learning workloads,
     as well as enhanced observability, tuning options,
-    and robust security features—making it ideal for modern, data-intensive applications.
-    Use the “cpu-mini” configuration (0.5vCPU and 2GB RAM) for Development environments,
-    and “cpu-small” (1vCPU and 4GB RAM or higher) – for Production environments.
+    and robust security features—making it ideal for modern, data-intensive applications.\n
+    Resource sizing options:
+    Lean (dev/test): 0.5 vCPU, 2 GiB RAM (cpu-mini profile)
+    Balanced (standard prod): 1 vCPU, 4 GiB RAM (cpu-small profile)
+    Resilient (prod with growth/headroom): 2 vCPU, 8 GiB RAM or higher (cpu-medium profile)\n
+    These values are for the main Postgres container. Other containers (pgBackRest, pgBouncer, exporter, instrumentation) have much lower requests (0.1–0.5vCPU, 128–512MB RAM each).
+    For production, use at least the “cpu-small” profile as recommended.
+    Use Lean for single instance, low traffic; Balanced for regular prod; Resilient for high concurrency, bursty workloads, or strict stability targets.
   changelog:
     file: ./CHANGELOG.md
   tags: ["Postgres", "PostgreSQL", "RDBMS"]
