@@ -24,10 +24,7 @@
     replication, and failover to ensure data resilience and minimal downtime.\n
     It comes preconfigured with popular extensions like pgvector for AI and machine learning workloads,
     as well as enhanced observability, tuning options,
-    and robust security features—making it ideal for modern, data-intensive applications.\n
-    Resource sizing options:
-    - Lean (dev/test): 0.5 vCPU, 2 GiB RAM
-    - Balanced (prod): 1 vCPU, 4 GiB RAM
+    and robust security features—making it ideal for modern, data-intensive applications.
   changelog:
     file: ./CHANGELOG.md
   tags: ["Postgres", "PostgreSQL", "RDBMS"]

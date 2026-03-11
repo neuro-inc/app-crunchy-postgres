@@ -56,14 +56,6 @@ apolo-hooks:
   image:
     repository: ghcr.io/neuro-inc/mlops-app-crunchy-postgres
     tag: latest
-  # Resource limits for apolo hooks container
-  resources:
-  #  limits:
-  #    cpu: 500m
-  #    memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
 
 ###################
 # Image Overrides #
@@ -120,45 +112,9 @@ apolo-hooks:
 # (HA). Settings "instances" overrides this value.
 # instanceReplicas: 1
 
-#################################
-# Container Resource Limits     #
-#################################
-
-# postgresResourceLimits sets the resource limits for the Postgres instance containers
-postgresResourceLimits:
-#  limits:
-#    cpu: 2000m
-#    memory: 4Gi
-  requests:
-    cpu: 1000m
-    memory: 2Gi
-
-# pgBackRestResourceLimits sets the resource limits for the pgBackRest container
-pgBackRestResourceLimits:
-#  limits:
-#    cpu: 1000m
-#    memory: 1Gi
-  requests:
-    cpu: 500m
-    memory: 512Mi
-
-# pgBouncerResourceLimits sets the resource limits for the pgBouncer container
-pgBouncerResourceLimits:
-#  limits:
-#    cpu: 500m
-#    memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 256Mi
-
-# exporterResourceLimits sets the resource limits for the metrics exporter container (monitoring)
-exporterResourceLimits:
-#  limits:
-#    cpu: 500m
-#    memory: 256Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
+##############################
+# Advanced Postgres Settings #
+##############################
 
 # instances allows you to define one or more Postgres instance sets. By default,
 # PGO will only deploy a single instance. Each instance set has similar
@@ -347,14 +303,7 @@ databaseInitSQL:
 # instrumentationImage: ""
 # instrumentationLogs: {}
 # instrumentationMetrics: {}
-# instrumentationResources sets the resource limits for the instrumentation container (OpenTelemetry)
-instrumentationResources:
-#  limits:
-#    cpu: 500m
-#    memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
+# instrumentationResources: {}
 
 #######################
 # Kubernetes Settings #
@@ -392,3 +341,16 @@ instrumentationResources:
 # but you may want to explicitly set it to "false" when using an SCC like
 # "anyuid"
 # openshift: false
+
+# preset:
+#   cpu: {{ .Values.resourcePreset.cpu | default "1000m" }}
+#   memory: {{ .Values.resourcePreset.memory | default "2Gi" }}
+# backupPreset:
+#   cpu: {{ .Values.resourcePreset.cpu | default "500m" }}
+#   memory: {{ .Values.resourcePreset.memory | default "512Mi" }}
+# bouncerPreset:
+#   cpu: {{ .Values.resourcePreset.cpu | default "100m" }}
+#   memory: {{ .Values.resourcePreset.memory | default "256Mi" }}
+# instrumentationPreset:
+#   cpu: {{ .Values.resourcePreset.cpu | default "100m" }}
+#   memory: {{ .Values.resourcePreset.memory | default "128Mi" }}
