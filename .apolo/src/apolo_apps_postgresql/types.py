@@ -305,7 +305,14 @@ class PGDataSourceConfig(AbstractAppFieldType):
 
 
 class PostgresInputs(AppInputs):
-    preset: Preset
+    preset: Preset = Field(
+        ...,
+        json_schema_extra=SchemaExtraMetadata(
+            title="Postgres cluster preset",
+            description="Select the resource preset used for the Postgres cluster. "
+            "Minimal resources: 0.5 CPU cores, 512 MiB memory.",
+        ).as_json_schema_extra(),
+    )
     postgres_config: PostgresConfig
     pg_bouncer: PGBouncer | None = None
     backup: PGBackupConfig | None = None
@@ -317,8 +324,7 @@ class PostgresAdminUser(BasePostgresUserCredentials):
         protected_namespaces=(),
         json_schema_extra=SchemaExtraMetadata(
             title="Postgres Admin User",
-            description="Configuration for the Postgres admin user."
-            " Minimal resources: 0.1 CPU cores, 256 MiB memory.",
+            description="Configuration for the Postgres admin user.",
             meta_type=SchemaMetaType.INTEGRATION,
         ).as_json_schema_extra(),
     )

@@ -524,7 +524,9 @@
   },
   "properties": {
     "preset": {
-      "$ref": "#/$defs/Preset"
+      "$ref": "#/$defs/Preset",
+      "x-description": "Select the resource preset used for the Postgres cluster. Minimal resources: 0.5 CPU cores, 512 MiB memory.",
+      "x-title": "Postgres cluster preset"
     },
     "postgres_config": {
       "$ref": "#/$defs/PostgresConfig"

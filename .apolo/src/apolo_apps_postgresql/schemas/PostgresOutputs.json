@@ -230,7 +230,7 @@
       ],
       "title": "PostgresAdminUser",
       "type": "object",
-      "x-description": "Configuration for the Postgres admin user. Minimal resources: 0.1 CPU cores, 256 MiB memory.",
+      "x-description": "Configuration for the Postgres admin user.",
       "x-is-advanced-field": false,
       "x-is-configurable": true,
       "x-meta-type": "integration",
