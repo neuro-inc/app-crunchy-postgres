@@ -151,7 +151,8 @@ class PGBouncer(AbstractAppFieldType):
     preset: Preset = Field(
         ...,
         json_schema_extra=SchemaExtraMetadata(
-            description="Preset to use for the PGBouncer instance.",
+            description="Preset to use for the PGBouncer instance. "
+            "Minimal resources: 0.1 CPU cores, 256 MiB memory.",
             title="Preset",
         ).as_json_schema_extra(),
     )
@@ -241,7 +242,8 @@ class PGBackupConfig(AbstractAppFieldType):
         ...,
         json_schema_extra=SchemaExtraMetadata(
             title="Backup job preset",
-            description="Select the resource preset used for running the backup job.",
+            description="Select the resource preset used for running the backup job. "
+            "Minimal resources: 0.5 CPU cores, 512 MiB memory.",
         ).as_json_schema_extra(),
     )
     schedule: PGBackupSchedule = Field(
@@ -285,7 +287,8 @@ class PGDataSourceConfig(AbstractAppFieldType):
         ...,
         json_schema_extra=SchemaExtraMetadata(
             title="Restore job preset",
-            description="Select the resource preset used for running the restore job.",
+            description="Select the resource preset used for running the restore job. "
+            "Minimal resources: 0.5 CPU cores, 512 MiB memory.",
         ).as_json_schema_extra(),
     )
     pgbackrest_options: list[str] = Field(
@@ -302,7 +305,15 @@ class PGDataSourceConfig(AbstractAppFieldType):
 
 
 class PostgresInputs(AppInputs):
-    preset: Preset
+    preset: Preset = Field(
+        ...,
+        json_schema_extra=SchemaExtraMetadata(
+            title="Postgres cluster preset",
+            description="Select the resource preset used for the Postgres "
+            "database server instance. "
+            "Minimal resources: 0.5 CPU cores, 512 MiB memory.",
+        ).as_json_schema_extra(),
+    )
     postgres_config: PostgresConfig
     pg_bouncer: PGBouncer | None = None
     backup: PGBackupConfig | None = None

@@ -195,7 +195,7 @@
         },
         "backup_preset": {
           "$ref": "#/$defs/Preset",
-          "x-description": "Select the resource preset used for running the backup job.",
+          "x-description": "Select the resource preset used for running the backup job. Minimal resources: 0.5 CPU cores, 512 MiB memory.",
           "x-title": "Backup job preset"
         },
         "schedule": {
@@ -267,7 +267,7 @@
       "properties": {
         "preset": {
           "$ref": "#/$defs/Preset",
-          "x-description": "Preset to use for the PGBouncer instance.",
+          "x-description": "Preset to use for the PGBouncer instance. Minimal resources: 0.1 CPU cores, 256 MiB memory.",
           "x-title": "Preset"
         },
         "replicas": {
@@ -305,7 +305,7 @@
         },
         "restore_preset": {
           "$ref": "#/$defs/Preset",
-          "x-description": "Select the resource preset used for running the restore job.",
+          "x-description": "Select the resource preset used for running the restore job. Minimal resources: 0.5 CPU cores, 512 MiB memory.",
           "x-title": "Restore job preset"
         },
         "pgbackrest_options": {
@@ -524,7 +524,9 @@
   },
   "properties": {
     "preset": {
-      "$ref": "#/$defs/Preset"
+      "$ref": "#/$defs/Preset",
+      "x-description": "Select the resource preset used for the Postgres database server instance. Minimal resources: 0.5 CPU cores, 512 MiB memory.",
+      "x-title": "Postgres cluster preset"
     },
     "postgres_config": {
       "$ref": "#/$defs/PostgresConfig"
