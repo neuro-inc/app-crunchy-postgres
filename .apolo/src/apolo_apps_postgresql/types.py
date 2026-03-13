@@ -309,7 +309,8 @@ class PostgresInputs(AppInputs):
         ...,
         json_schema_extra=SchemaExtraMetadata(
             title="Postgres cluster preset",
-            description="Select the resource preset used for the Postgres cluster. "
+            description="Select the resource preset used for the Postgres "
+            "database server instance. "
             "Minimal resources: 0.5 CPU cores, 512 MiB memory.",
         ).as_json_schema_extra(),
     )
