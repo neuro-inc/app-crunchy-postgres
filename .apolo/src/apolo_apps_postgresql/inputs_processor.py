@@ -5,6 +5,7 @@ import typing as t
 
 import apolo_sdk
 
+from apolo_app_types import ApoloSecret
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
 from apolo_app_types.helm.apps.common import (
     get_preset,
@@ -152,8 +153,18 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
             "tolerations": tolerations,
         }
 
-    @staticmethod
-    def _build_provider_values(
+    async def _get_secret_value_maybe(
+        self,
+        data: ApoloSecret | t.Any,
+    ) -> str | t.Any:
+        if isinstance(data, ApoloSecret):
+            return (await self.client.secrets.get(data.key)).decode("utf-8")
+        if isinstance(data, dict) and "key" in data:
+            return (await self.client.secrets.get(data["key"])).decode("utf-8")
+        return data
+
+    async def _build_provider_values(
+        self,
         provider: apolo_sdk.Bucket.Provider,
         credentials: t.Mapping[str, t.Any],
     ) -> tuple[dict[str, t.Any], dict[str, t.Any], dict[str, t.Any]]:
@@ -171,8 +182,12 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                     "bucket": credentials["bucket_name"],
                     "endpoint": credentials["endpoint_url"],
                     "region": credentials["region_name"],
-                    "key": credentials["access_key_id"],
-                    "keySecret": credentials["secret_access_key"],
+                    "key": await self._get_secret_value_maybe(
+                        credentials["access_key_id"]
+                    ),
+                    "keySecret": await self._get_secret_value_maybe(
+                        credentials["secret_access_key"]
+                    ),
                 }
             }
             repo_config = {
@@ -185,10 +200,11 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
             extra_global = {"repo1-s3-uri-style": "path"}
             return secret_values, repo_config, extra_global
         if provider == apolo_sdk.Bucket.Provider.GCP:
+            key_data = await self._get_secret_value_maybe(credentials["key_data"])
             secret_values = {
                 "gcs": {
                     "bucket": credentials["bucket_name"],
-                    "key": base64.b64decode(credentials["key_data"]).decode("utf-8"),
+                    "key": base64.b64decode(key_data).decode("utf-8"),
                 }
             }
             repo_config = {
@@ -237,7 +253,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         provider = bucket_credentials.credentials[0].provider
         credentials = bucket_credentials.credentials[0].credentials
 
-        secret_values, repo_config, extra_global = self._build_provider_values(
+        secret_values, repo_config, extra_global = await self._build_provider_values(
             provider, credentials
         )
 
@@ -309,26 +325,47 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         assert input_.source
         logger.info("Getting data source config for clone")
 
-        bucket_name = input_.source.source_bucket.id
-        credentials_name = f"{pgcluster_crd_name}-src"[:40]
-
-        logger.info("Getting source bucket credentials with id: %s", bucket_name)
-        bucket_credentials = await get_or_create_bucket_credentials(
-            client=self.client,
-            bucket_name=bucket_name,
-            credentials_name=credentials_name,
-            supported_providers=[
-                apolo_sdk.Bucket.Provider.AWS,
-                apolo_sdk.Bucket.Provider.MINIO,
-                apolo_sdk.Bucket.Provider.GCP,
-            ],
-        )
+        if input_.source.source_bucket.credentials:
+            logger.info("Using provided source bucket credentials (first one)")
+            creds = []
+            for input_cred in input_.source.source_bucket.credentials:
+                creds.append(
+                    apolo_sdk.BucketCredentials(
+                        bucket_id=input_.source.source_bucket.id,
+                        provider=apolo_sdk.Bucket.Provider(
+                            input_.source.source_bucket.bucket_provider.lower()
+                        ),
+                        credentials=input_cred.model_dump(),
+                    )
+                )
+            bucket_credentials = apolo_sdk.PersistentBucketCredentials(
+                id="",
+                owner="",
+                cluster_name="",
+                name=None,
+                read_only=False,
+                credentials=creds,
+            )
+        else:
+            bucket_name = input_.source.source_bucket.id
+            credentials_name = f"{pgcluster_crd_name}-src"[:40]
+            logger.info("Getting source bucket credentials with id: %s", bucket_name)
+            bucket_credentials = await get_or_create_bucket_credentials(
+                client=self.client,
+                bucket_name=bucket_name,
+                credentials_name=credentials_name,
+                supported_providers=[
+                    apolo_sdk.Bucket.Provider.AWS,
+                    apolo_sdk.Bucket.Provider.MINIO,
+                    apolo_sdk.Bucket.Provider.GCP,
+                ],
+            )
         logger.info("Got source bucket credentials")
 
         provider = bucket_credentials.credentials[0].provider
         credentials = bucket_credentials.credentials[0].credentials
 
-        secret_values, repo_config, extra_global = self._build_provider_values(
+        secret_values, repo_config, extra_global = await self._build_provider_values(
             provider, credentials
         )
         preset = get_preset(self.client, input_.source.restore_preset.name)
