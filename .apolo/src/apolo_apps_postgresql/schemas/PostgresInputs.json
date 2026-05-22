@@ -47,9 +47,6 @@
                 "$ref": "#/$defs/S3BucketCredentials"
               },
               {
-                "$ref": "#/$defs/MinioBucketCredentials"
-              },
-              {
                 "$ref": "#/$defs/GCPBucketCredentials"
               }
             ]
@@ -98,7 +95,7 @@
     },
     "GCPBucketCredentials": {
       "properties": {
-        "name": {
+        "bucket_name": {
           "description": "The name of the bucket.",
           "title": "Bucket name",
           "type": "string"
@@ -116,60 +113,10 @@
         }
       },
       "required": [
-        "name",
+        "bucket_name",
         "key_data"
       ],
       "title": "GCPBucketCredentials",
-      "type": "object",
-      "x-description": "",
-      "x-is-advanced-field": false,
-      "x-is-configurable": true,
-      "x-meta-type": "inline",
-      "x-title": "",
-      "x-type": "PostgresUsers"
-    },
-    "MinioBucketCredentials": {
-      "properties": {
-        "name": {
-          "description": "The name of the bucket.",
-          "title": "Bucket name",
-          "type": "string"
-        },
-        "type": {
-          "$ref": "#/$defs/CredentialsType",
-          "default": "READ_ONLY",
-          "description": "The type of the bucket.",
-          "title": "Bucket type"
-        },
-        "access_key_id": {
-          "description": "The access key ID of the bucket.",
-          "title": "Bucket access key ID",
-          "type": "string"
-        },
-        "secret_access_key": {
-          "$ref": "#/$defs/ApoloSecret",
-          "description": "The secret access key of the bucket.",
-          "title": "Bucket secret access key"
-        },
-        "endpoint_url": {
-          "description": "The endpoint URL of the bucket.",
-          "title": "Bucket endpoint URL",
-          "type": "string"
-        },
-        "region_name": {
-          "description": "The region name of the bucket.",
-          "title": "Bucket region name",
-          "type": "string"
-        }
-      },
-      "required": [
-        "name",
-        "access_key_id",
-        "secret_access_key",
-        "endpoint_url",
-        "region_name"
-      ],
-      "title": "MinioBucketCredentials",
       "type": "object",
       "x-description": "",
       "x-is-advanced-field": false,
@@ -473,7 +420,7 @@
     },
     "S3BucketCredentials": {
       "properties": {
-        "name": {
+        "bucket_name": {
           "description": "The name of the bucket.",
           "title": "Bucket name",
           "type": "string"
@@ -506,7 +453,7 @@
         }
       },
       "required": [
-        "name",
+        "bucket_name",
         "access_key_id",
         "secret_access_key",
         "endpoint_url",

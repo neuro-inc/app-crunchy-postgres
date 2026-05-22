@@ -1,6 +1,7 @@
 import base64
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import apolo_sdk
 import pytest
 
 
@@ -133,3 +134,11 @@ def mock_kubernetes_client():
             "mock_networking_instance": mock_networking_instance,
             "mock_custom_objects": mock_custom_objects_instance,
         }
+
+
+@pytest.fixture
+def apolo_client(setup_clients) -> apolo_sdk.Client:
+    client: apolo_sdk.Client = setup_clients
+
+    client.secrets.get = AsyncMock(return_value=b"bW9ja2VkLXNlY3JldC1kYXRh")
+    return client
