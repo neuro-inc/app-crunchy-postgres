@@ -4,6 +4,10 @@ metadata:
   name: {{ default .Release.Name .Values.name }}
   annotations:
     postgres-operator.crunchydata.com/autoCreateUserSchema: "true"
+    {{- if not (include "postgres.backupsConfigured" .) }}
+    {{- /* Without this the operator pauses reconciliation of clusters that used to have a repo */}}
+    postgres-operator.crunchydata.com/authorizeBackupRemoval: "true"
+    {{- end }}
 spec:
   postgresVersion: {{ required "You must set the version of Postgres to deploy." .Values.postgresVersion }}
   {{- if .Values.postGISVersion }}
@@ -38,6 +42,7 @@ spec:
           memory: {{ default "" .Values.instanceMemory | quote }}
       {{- end }}
   {{- end }}
+  {{- if include "postgres.backupsConfigured" . }}
   backups:
     pgbackrest:
       {{- if .Values.imagePgBackRest }}
@@ -132,6 +137,7 @@ spec:
               requests:
                 storage: {{ default "1Gi" .Values.backupsSize | quote }}
       {{- end }}
+  {{- end }}
   {{- if or .Values.pgBouncerReplicas .Values.pgBouncerConfig }}
   proxy:
     pgBouncer:
