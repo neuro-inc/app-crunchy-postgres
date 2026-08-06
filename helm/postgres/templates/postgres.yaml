@@ -5,7 +5,7 @@ metadata:
   annotations:
     postgres-operator.crunchydata.com/autoCreateUserSchema: "true"
     {{- if not (include "postgres.backupsConfigured" .) }}
-    {{/* Without this the operator pauses reconciliation of clusters that used to have a repo */}}
+    {{- /* Without this the operator pauses reconciliation of clusters that used to have a repo */}}
     postgres-operator.crunchydata.com/authorizeBackupRemoval: "true"
     {{- end }}
 spec:
