@@ -114,10 +114,6 @@ imagePullSecrets:
   value: {{ .Values.workers | quote }}
 {{- end }}
 {{- include "install.relatedImages" . }}
-{{- if .Values.disable_check_for_upgrades }}
-- name: CHECK_FOR_UPGRADES
-  value: "false"
-{{- end }}
 {{- if .Values.features }}
 {{- $value := .Values.features }}
 - name: PGO_FEATURE_GATES
@@ -130,3 +126,4 @@ imagePullSecrets:
   value: "{{ trimSuffix "," $out }}"
 {{- end }}
 {{- end }}{{/* define */}}
+

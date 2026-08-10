@@ -1,11 +1,9 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.17.2
   name: postgresclusters.postgres-operator.crunchydata.com
   labels:
-    app.kubernetes.io/version: 5.8.3
+    app.kubernetes.io/version: 5.8.5
 spec:
   group: postgres-operator.crunchydata.com
   names:
@@ -4555,7 +4553,7 @@ spec:
                         - message: change port using .spec.port instead
                           rule: '!has(self.port)'
                         - message: TLS is always enabled
-                          rule: '!has(self.ssl) && !self.exists(k, k.startsWith("ssl_"))'
+                          rule: '!has(self.ssl) && !self.exists(k, k.startsWith("ssl_") && !(k == ''ssl_groups'' || k == ''ssl_ecdh_curve''))'
                         - message: domain socket paths cannot be changed
                           rule: '!self.exists(k, k.startsWith("unix_socket_"))'
                         - message: wal_level must be "replica" or higher
@@ -12173,7 +12171,7 @@ spec:
                   type: string
                 postgresVersion:
                   description: The major version of PostgreSQL installed in the PostgreSQL image
-                  maximum: 17
+                  maximum: 18
                   minimum: 11
                   type: integer
                 proxy:
@@ -17345,6 +17343,9 @@ spec:
                 - instances
                 - postgresVersion
               type: object
+              x-kubernetes-validations:
+                - message: The ssl_groups parameter is only available in pg18 and greater
+                  rule: '!has(self.?config.parameters.ssl_groups) || self.postgresVersion > 17'
             status:
               description: PostgresClusterStatus defines the observed state of PostgresCluster
               properties:
@@ -17680,11 +17681,6 @@ spec:
                           type: integer
                       type: object
                   type: object
-                registrationRequired:
-                  properties:
-                    pgoVersion:
-                      type: string
-                  type: object
                 startupInstance:
                   description: |-
                     The instance that should be started first when bootstrapping and/or starting a
@@ -17692,8 +17688,6 @@ spec:
                   type: string
                 startupInstanceSet:
                   description: The instance set associated with the startupInstance
-                  type: string
-                tokenRequired:
                   type: string
                 userInterface:
                   description: Current state of the PostgreSQL user interface.
