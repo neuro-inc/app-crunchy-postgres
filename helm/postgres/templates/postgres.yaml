@@ -150,9 +150,21 @@ spec:
       replicas: {{ .Values.pgBouncerReplicas }}
       {{- end }}
   {{- end }}
-  {{- if .Values.patroni }}
+  {{- $patroni := deepCopy (.Values.patroni | default dict) }}
+  {{- if not (include "postgres.backupsConfigured" .) }}
+  {{- $dynamic := get $patroni "dynamicConfiguration" | default dict }}
+  {{- $postgresql := get $dynamic "postgresql" | default dict }}
+  {{- $parameters := get $postgresql "parameters" | default dict }}
+  {{- if not (hasKey $parameters "archive_timeout") }}
+  {{- $_ := set $parameters "archive_timeout" 0 }}
+  {{- end }}
+  {{- $_ := set $postgresql "parameters" $parameters }}
+  {{- $_ := set $dynamic "postgresql" $postgresql }}
+  {{- $_ := set $patroni "dynamicConfiguration" $dynamic }}
+  {{- end }}
+  {{- if $patroni }}
   patroni:
-{{ toYaml .Values.patroni | indent 4 }}
+{{ toYaml $patroni | indent 4 }}
   {{- end }}
   {{- if .Values.users }}
   users:
