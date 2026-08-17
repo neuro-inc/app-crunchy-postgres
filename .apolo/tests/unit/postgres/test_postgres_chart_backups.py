@@ -153,3 +153,40 @@ def test_other_patroni_parameters_are_preserved(tmp_path):
     parameters = patroni_parameters(cluster)
     assert parameters["max_connections"] == 200
     assert parameters["archive_timeout"] == 0
+
+
+def test_empty_parameters_block_still_gets_the_setting(tmp_path):
+    """A key written with nothing under it parses as None, not as an empty map.
+
+    Found in review: merging the default under that None dropped the setting
+    silently and rendered `parameters: null` into the cluster spec.
+    """
+    overrides = {
+        "patroni": {"dynamicConfiguration": {"postgresql": {"parameters": None}}}
+    }
+    cluster = render_postgrescluster(tmp_path, **overrides)
+
+    assert patroni_parameters(cluster)["archive_timeout"] == 0
+
+
+def test_empty_patroni_block_still_gets_the_setting(tmp_path):
+    cluster = render_postgrescluster(tmp_path, patroni={})
+
+    assert patroni_parameters(cluster)["archive_timeout"] == 0
+
+
+def test_unrelated_patroni_keys_survive(tmp_path):
+    overrides = {
+        "patroni": {
+            "dynamicConfiguration": {
+                "synchronous_mode": True,
+                "postgresql": {"pg_hba": ["host all all 0.0.0.0/0 md5"]},
+            }
+        }
+    }
+    cluster = render_postgrescluster(tmp_path, **overrides)
+
+    dynamic = cluster["spec"]["patroni"]["dynamicConfiguration"]
+    assert dynamic["synchronous_mode"] is True
+    assert dynamic["postgresql"]["pg_hba"] == ["host all all 0.0.0.0/0 md5"]
+    assert dynamic["postgresql"]["parameters"]["archive_timeout"] == 0

@@ -150,10 +150,17 @@ spec:
       replicas: {{ .Values.pgBouncerReplicas }}
       {{- end }}
   {{- end }}
-  {{- $patroni := .Values.patroni | default dict }}
+  {{- $patroni := deepCopy (.Values.patroni | default dict) }}
   {{- if not (include "postgres.backupsConfigured" .) }}
-  {{- $noArchive := dict "dynamicConfiguration" (dict "postgresql" (dict "parameters" (dict "archive_timeout" 0))) }}
-  {{- $patroni = mergeOverwrite $noArchive (deepCopy $patroni) }}
+  {{- $dynamic := get $patroni "dynamicConfiguration" | default dict }}
+  {{- $postgresql := get $dynamic "postgresql" | default dict }}
+  {{- $parameters := get $postgresql "parameters" | default dict }}
+  {{- if not (hasKey $parameters "archive_timeout") }}
+  {{- $_ := set $parameters "archive_timeout" 0 }}
+  {{- end }}
+  {{- $_ := set $postgresql "parameters" $parameters }}
+  {{- $_ := set $dynamic "postgresql" $postgresql }}
+  {{- $_ := set $patroni "dynamicConfiguration" $dynamic }}
   {{- end }}
   {{- if $patroni }}
   patroni:
