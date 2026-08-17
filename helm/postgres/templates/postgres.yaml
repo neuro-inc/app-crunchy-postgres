@@ -150,9 +150,14 @@ spec:
       replicas: {{ .Values.pgBouncerReplicas }}
       {{- end }}
   {{- end }}
-  {{- if .Values.patroni }}
+  {{- $patroni := .Values.patroni | default dict }}
+  {{- if not (include "postgres.backupsConfigured" .) }}
+  {{- $noArchive := dict "dynamicConfiguration" (dict "postgresql" (dict "parameters" (dict "archive_timeout" 0))) }}
+  {{- $patroni = mergeOverwrite $noArchive (deepCopy $patroni) }}
+  {{- end }}
+  {{- if $patroni }}
   patroni:
-{{ toYaml .Values.patroni | indent 4 }}
+{{ toYaml $patroni | indent 4 }}
   {{- end }}
   {{- if .Values.users }}
   users:

@@ -101,3 +101,55 @@ def test_configured_backup_volume_uses_the_requested_size(tmp_path):
     assert (
         repo["volume"]["volumeClaimSpec"]["resources"]["requests"]["storage"] == "5Gi"
     )
+
+
+def patroni_parameters(cluster):
+    patroni = cluster["spec"].get("patroni") or {}
+    dynamic = patroni.get("dynamicConfiguration") or {}
+    return (dynamic.get("postgresql") or {}).get("parameters") or {}
+
+
+def test_wal_archiving_is_not_forced_when_backups_are_not_configured(tmp_path):
+    """The operator sets archive_timeout=60 and archive_command=true.
+
+    With no repo to archive to, that switches a full 16MB WAL segment every
+    minute on any cluster taking writes and throws it away. Measured on dev
+    under IT-163: one segment per minute, stopping the moment this is set.
+    """
+    cluster = render_postgrescluster(tmp_path)
+
+    assert patroni_parameters(cluster)["archive_timeout"] == 0
+
+
+def test_configured_backups_leave_archiving_alone(tmp_path):
+    cluster = render_postgrescluster(tmp_path, backupsSize="5Gi")
+
+    assert "archive_timeout" not in patroni_parameters(cluster)
+
+
+def test_explicit_archive_timeout_wins(tmp_path):
+    overrides = {
+        "patroni": {
+            "dynamicConfiguration": {
+                "postgresql": {"parameters": {"archive_timeout": 300}}
+            }
+        }
+    }
+    cluster = render_postgrescluster(tmp_path, **overrides)
+
+    assert patroni_parameters(cluster)["archive_timeout"] == 300
+
+
+def test_other_patroni_parameters_are_preserved(tmp_path):
+    overrides = {
+        "patroni": {
+            "dynamicConfiguration": {
+                "postgresql": {"parameters": {"max_connections": 200}}
+            }
+        }
+    }
+    cluster = render_postgrescluster(tmp_path, **overrides)
+
+    parameters = patroni_parameters(cluster)
+    assert parameters["max_connections"] == 200
+    assert parameters["archive_timeout"] == 0
