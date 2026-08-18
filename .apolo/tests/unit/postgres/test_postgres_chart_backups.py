@@ -54,8 +54,8 @@ def render_postgrescluster(tmp_path, **overrides):
 def test_no_backup_repo_when_backups_are_not_configured(tmp_path):
     """Installing without backups must not provision a pgBackRest repo.
 
-    Regression test for IT-94: the chart used to fall back to a 1Gi volume repo,
-    so an app installed with backups off still got a PVC that later filled up.
+    The chart used to fall back to a 1Gi volume repo, so an app installed
+    with backups off still got a PVC that later filled up.
     """
     cluster = render_postgrescluster(tmp_path)
 
@@ -113,8 +113,8 @@ def test_wal_archiving_is_not_forced_when_backups_are_not_configured(tmp_path):
     """The operator sets archive_timeout=60 and archive_command=true.
 
     With no repo to archive to, that switches a full 16MB WAL segment every
-    minute on any cluster taking writes and throws it away. Measured on dev
-    under IT-163: one segment per minute, stopping the moment this is set.
+    minute on any cluster taking writes and throws it away. Measured on dev:
+    one segment per minute, stopping the moment this is set.
     """
     cluster = render_postgrescluster(tmp_path)
 
