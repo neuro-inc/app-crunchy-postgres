@@ -1,9 +1,11 @@
 from datetime import datetime
+from decimal import Decimal
 from unittest.mock import AsyncMock
 
 import apolo_sdk
 import pydantic
 import pytest
+from apolo_app_types_fixtures.constants import TEST_PRESETS
 from apolo_apps_postgresql.inputs_processor import PostgresInputsChartValueProcessor
 from apolo_apps_postgresql.types import (
     PGBackupConfig,
@@ -1108,3 +1110,49 @@ async def test_values_postgresql_generation_source_data_bucket_credentials(
     }
     assert apolo_client.buckets.create.call_count == 0
     assert apolo_client.buckets.persistent_credentials_create.call_count == 0
+
+
+@pytest.mark.parametrize(
+    "presets_available",
+    [
+        {
+            **TEST_PRESETS,
+            "cpu-on-gpu-pool": apolo_sdk.Preset(
+                credits_per_hour=Decimal("0.1"),
+                cpu=2.0,
+                memory=8,
+                available_resource_pool_names=("gpu_pool",),
+            ),
+        }
+    ],
+    indirect=True,
+)
+async def test_values_postgresql_generation_gpu_pool_toleration(setup_clients):
+    apolo_client = setup_clients
+    processor = PostgresInputsChartValueProcessor(apolo_client)
+
+    helm_params = await processor.gen_extra_values(
+        input_=PostgresInputs(
+            preset=Preset(name="cpu-on-gpu-pool"),
+            postgres_config=PostgresConfig(
+                postgres_version=PostgresSupportedVersions.v16,
+                instance_replicas=1,
+                instance_size=1,
+                db_users=[PostgresDBUser(name="u1", db_names=["d1"])],
+            ),
+            pg_bouncer=PGBouncer(preset=Preset(name="cpu-large")),
+            backup=None,
+        ),
+        app_name="psdb",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    gpu_toleration = {
+        "effect": "NoSchedule",
+        "key": "nvidia.com/gpu",
+        "operator": "Exists",
+    }
+    assert gpu_toleration in helm_params["instances"][0]["tolerations"]
+    assert gpu_toleration not in helm_params["pgBouncerConfig"]["tolerations"]
