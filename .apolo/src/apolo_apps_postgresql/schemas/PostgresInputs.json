@@ -123,7 +123,7 @@
       "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "PostgresUsers"
+      "x-type": "GCPBucketCredentials"
     },
     "PGBackupConfig": {
       "properties": {
@@ -208,7 +208,7 @@
       "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "PostgresUsers"
+      "x-type": "PGBackupSchedule"
     },
     "PGBouncer": {
       "properties": {
@@ -381,7 +381,7 @@
       "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "PostgresUsers"
+      "x-type": "PostgresDBUser"
     },
     "PostgresSupportedVersions": {
       "enum": [
@@ -467,7 +467,7 @@
       "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "",
-      "x-type": "PostgresUsers"
+      "x-type": "S3BucketCredentials"
     }
   },
   "properties": {

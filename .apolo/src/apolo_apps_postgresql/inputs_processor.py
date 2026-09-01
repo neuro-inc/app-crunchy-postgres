@@ -9,6 +9,7 @@ from apolo_app_types import ApoloSecret
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
 from apolo_app_types.helm.apps.common import (
     get_preset,
+    get_resource_pools_for_preset,
     preset_to_affinity,
     preset_to_resources,
     preset_to_tolerations,
@@ -38,7 +39,10 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
     ) -> list[dict[str, t.Any]]:
         preset = get_preset(self.client, instance_preset_name)
         resources = preset_to_resources(preset)
-        tolerations = await preset_to_tolerations(preset)
+        resource_pools = get_resource_pools_for_preset(
+            self.client, instance_preset_name
+        )
+        tolerations = await preset_to_tolerations(preset, resource_pools)
         affinity = preset_to_affinity(preset)
 
         pod_anti_afinity = {
@@ -110,7 +114,8 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
     ) -> dict[str, t.Any]:
         preset = get_preset(self.client, bouncer_preset_name)
         resources = preset_to_resources(preset)
-        tolerations = await preset_to_tolerations(preset)
+        resource_pools = get_resource_pools_for_preset(self.client, bouncer_preset_name)
+        tolerations = await preset_to_tolerations(preset, resource_pools)
         affinity = preset_to_affinity(preset)
         pod_anti_afinity = {
             "preferredDuringSchedulingIgnoredDuringExecution": [
@@ -259,7 +264,10 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
 
         preset = get_preset(self.client, input_.backup.backup_preset.name)
         resources = preset_to_resources(preset)
-        tolerations = await preset_to_tolerations(preset)
+        resource_pools = get_resource_pools_for_preset(
+            self.client, input_.backup.backup_preset.name
+        )
+        tolerations = await preset_to_tolerations(preset, resource_pools)
         affinity = preset_to_affinity(preset)
 
         global_config: dict[str, t.Any] = {
@@ -370,7 +378,10 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         )
         preset = get_preset(self.client, input_.source.restore_preset.name)
         resources = preset_to_resources(preset)
-        tolerations = await preset_to_tolerations(preset)
+        resource_pools = get_resource_pools_for_preset(
+            self.client, input_.source.restore_preset.name
+        )
+        tolerations = await preset_to_tolerations(preset, resource_pools)
         affinity = preset_to_affinity(preset)
 
         values: dict[str, t.Any] = {
