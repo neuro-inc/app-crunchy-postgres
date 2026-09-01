@@ -20,7 +20,9 @@ Install app with
 ## Deploy components separately
 ### Install Postgres Operator (PRGO) and corresponding CRDs for k8s:
 
-`helm upgrade --install postgres-operator -n postgres-operator --create-namespace helm/install`
+`helm upgrade --install postgres-operator -n postgres-operator --create-namespace oci://registry.developers.crunchydata.com/crunchydata/pgo --version 5.8.5`
+
+The operator chart is consumed straight from Crunchy Data's OCI registry; this repository no longer carries a copy of it.
 
 When `--set singleNamespace=true`, PGO watches for and responds to PostgresClusters only in namespace, where it is installed. In this case, change namespace name in the following commands from `pgvector` to `postgres-operator` or other name you used to install operator itself.
 
