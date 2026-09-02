@@ -38,6 +38,7 @@ class PostgresSupportedVersions(enum.StrEnum):
     v15 = "15"
     v16 = "16"
     v17 = "17"
+    v18 = "18"
 
 
 POSTGRES_RESOURCES_PATTERN = r"^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
