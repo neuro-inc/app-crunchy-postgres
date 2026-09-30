@@ -55,7 +55,7 @@ async def test_postgres_outputs(setup_clients, mock_kubernetes_client, app_insta
     mock = mock_kubernetes_client["mock_custom_objects"]
     mock.list_namespaced_custom_object.assert_called_once_with(
         group="postgres-operator.crunchydata.com",
-        version="v1beta1",
+        version="v1",
         namespace="default-namespace",
         plural="postgresclusters",
         label_selector=f"argocd.argoproj.io/instance={app_instance_id}",

@@ -93,7 +93,7 @@ def mock_kubernetes_client():
         ):
             if (
                 group == "postgres-operator.crunchydata.com"
-                and version == "v1beta1"
+                and version == "v1"
                 and plural == "postgresclusters"
             ):
                 return {

@@ -48,7 +48,7 @@ async def create_apolo_secret_with_retry(
 def get_postgres_cluster(app_instance_id: str) -> dict[str, t.Any]:
     pg_clusters = get_crd_objects(
         api_group="postgres-operator.crunchydata.com",
-        api_version="v1beta1",
+        api_version="v1",
         crd_plural_name="postgresclusters",
         label_selector=f"argocd.argoproj.io/instance={app_instance_id}",
     )
