@@ -181,7 +181,11 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
             - repo_config: provider-specific repo section
             - extra_global: additional pgBackRest global settings
         """
-        if provider in (apolo_sdk.Bucket.Provider.AWS, apolo_sdk.Bucket.Provider.MINIO):
+        if provider in (
+            apolo_sdk.Bucket.Provider.AWS,
+            apolo_sdk.Bucket.Provider.MINIO,
+            apolo_sdk.Bucket.Provider.SEAWEEDFS,
+        ):
             secret_values = {
                 "s3": {
                     "bucket": credentials["bucket_name"],
@@ -250,6 +254,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
             supported_providers=[
                 apolo_sdk.Bucket.Provider.AWS,
                 apolo_sdk.Bucket.Provider.MINIO,
+                apolo_sdk.Bucket.Provider.SEAWEEDFS,
                 apolo_sdk.Bucket.Provider.GCP,
             ],
         )
@@ -365,6 +370,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
                 supported_providers=[
                     apolo_sdk.Bucket.Provider.AWS,
                     apolo_sdk.Bucket.Provider.MINIO,
+                    apolo_sdk.Bucket.Provider.SEAWEEDFS,
                     apolo_sdk.Bucket.Provider.GCP,
                 ],
             )

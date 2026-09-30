@@ -473,8 +473,12 @@ async def test_values_postgresql_generation_with_postgres_user(
         )
 
 
-async def test_values_postgresql_generation_with_minio(
-    setup_clients, mock_get_preset_cpu
+@pytest.mark.parametrize(
+    "provider",
+    [apolo_sdk.Bucket.Provider.MINIO, apolo_sdk.Bucket.Provider.SEAWEEDFS],
+)
+async def test_values_postgresql_generation_with_s3_compatible_storage(
+    setup_clients, mock_get_preset_cpu, provider
 ):
     apolo_client = setup_clients
     processor = PostgresInputsChartValueProcessor(apolo_client)
@@ -485,7 +489,7 @@ async def test_values_postgresql_generation_with_minio(
         cluster_name="cluster",
         org_name="test-org",
         project_name="test-project",
-        provider=apolo_sdk.Bucket.Provider.MINIO,
+        provider=provider,
         created_at=datetime.today(),
         imported=False,
         name="test-bucket",
@@ -501,7 +505,7 @@ async def test_values_postgresql_generation_with_minio(
         credentials=[
             apolo_sdk.BucketCredentials(
                 bucket_id="bucket-id",
-                provider=apolo_sdk.Bucket.Provider.MINIO,
+                provider=provider,
                 credentials={
                     "bucket_name": "test-bucket",
                     "endpoint_url": "test-endpoint",
