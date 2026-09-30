@@ -21,8 +21,7 @@ postgresVersion: 18
 # PostgresCluster with PGO v6, you can use the newer v1 API version or the older
 # v1beta1. When deploying a PostgresCluster with PGO v5, you must use the older
 # PostgresCluster API version, v1beta1.
-# Apolo: stays v1beta1 until every cluster runs PGO 6 (imdc is still on 5.8.x).
-apiVersion: v1beta1
+apiVersion: v1
 
 # postGISVersion if set and coupled with a PostGIS enabled container, enables
 # PostGIS. This version number needs to be available as one of the
