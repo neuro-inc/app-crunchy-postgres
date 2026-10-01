@@ -542,12 +542,19 @@ async def test_values_postgresql_generation_with_s3_compatible_storage(
                 ),
             ),
         ),
-        app_name="psdb",
+        app_name="1234567890123456789-middle-12345678901234",
         namespace=DEFAULT_NAMESPACE,
         app_secrets_name=APP_SECRETS_NAME,
         app_id=APP_ID,
     )
     assert helm_params["features"] == {"AutoCreateUserSchema": "true"}
+    expected_bucket_name = "1234567890123456789-12345678901234-bkp"
+    apolo_client.buckets.get.assert_awaited_once_with(
+        bucket_id_or_name=expected_bucket_name
+    )
+    apolo_client.buckets.persistent_credentials_get.assert_awaited_once_with(
+        credential_id_or_name=expected_bucket_name
+    )
     assert len(helm_params["instances"]) == 1
     assert helm_params["instances"][0]["name"] == "instance1"
     assert helm_params["instances"][0]["replicas"] == 3
