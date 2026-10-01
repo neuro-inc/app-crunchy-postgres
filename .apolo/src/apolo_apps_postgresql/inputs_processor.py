@@ -236,7 +236,7 @@ class PostgresInputsChartValueProcessor(BaseChartValueProcessor[PostgresInputs])
         if not input_.backup:
             return {}
 
-        credentials_name = f"{app_name}-bkp"[:40]
+        credentials_name = f"{app_name}-bkp"[-40:]
         if not input_.backup.backup_bucket:
             bucket_name = credentials_name
             msg = (
